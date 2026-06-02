@@ -350,9 +350,21 @@
             <!-- VIEW: OUTPUT HASIL GENERATE -->
             <div id="view-result" class="hidden max-w-5xl mx-auto h-full flex flex-col space-y-4">
                 <div class="bg-white rounded-xl border border-slate-200 flex shadow-sm overflow-hidden flex-shrink-0">
-                    <button onclick="switchResultTab('prompt')" id="rtab-prompt" class="px-6 py-4 font-bold text-blue-600 border-b-2 border-blue-600 text-sm md:text-base">Prompt Master</button>
-                    <button onclick="switchResultTab('blueprint')" id="rtab-blueprint" class="px-6 py-4 font-bold text-slate-500 text-sm md:text-base">Blueprint / Kisi-Kisi</button>
-                    <button onclick="switchResultTab('soal')" id="rtab-soal" class="px-6 py-4 font-bold text-slate-500 text-sm md:text-base">Naskah Asesmen Sumatif</button>
+                    <button onclick="switchResultTab('prompt')" id="rtab-prompt" class="px-4 py-4 font-bold text-blue-600 border-b-2 border-blue-600 text-sm md:text-base">Prompt Master</button>
+                    <button onclick="switchResultTab('blueprint')" id="rtab-blueprint" class="px-4 py-4 font-bold text-slate-500 text-sm md:text-base flex items-center gap-2">
+                        <span id="rtab-blueprint-badge" class="hidden w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Blueprint / Kisi-Kisi
+                    </button>
+                    <button onclick="switchResultTab('soal')" id="rtab-soal" class="px-4 py-4 font-bold text-slate-500 text-sm md:text-base flex items-center gap-2">
+                        <span id="rtab-soal-badge" class="hidden w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Naskah Asesmen Sumatif
+                    </button>
+                </div>
+
+                <!-- Info navigasi tab — muncul setelah step 2 selesai -->
+                <div id="tab-nav-hint" class="hidden flex-shrink-0 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5 flex items-center gap-2 text-xs text-blue-700 font-medium">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Semua hasil tersimpan di tab ini. Klik tab <strong class="mx-1">Blueprint / Kisi-Kisi</strong> untuk melihat kisi-kisi, atau <strong class="mx-1">Naskah Asesmen Sumatif</strong> untuk soal & pembahasan.
                 </div>
 
                 <!-- Banner Download Khusus Guest — muncul setelah generate berhasil -->
@@ -682,6 +694,8 @@
                 endLoadingProgress();
                 setTimeout(() => showLoading(false), 500);
                 showToast('Blueprint berhasil dibuat! Silakan tinjau sebelum lanjut ke Langkah 2.', 'success');
+                // Tampilkan indikator badge di tab
+                document.getElementById('rtab-blueprint-badge').classList.remove('hidden');
                 // Tampilkan banner download untuk guest
                 if (!currentUser) showGuestDownloadBanner('blueprint');
                 const btnStep2 = document.getElementById('btn-wizard-step2');
@@ -705,6 +719,8 @@
             const prompt2 = buildPrompt2(formData);
             showLoading(true, "Menyusun Soal & Pembahasan...", "Langkah 2: AI sedang merancang lembar soal nyata sesuai acuan blueprint yang baru dibuat.");
             runLoadingProgress(45000);
+            // [FIX] Pastikan view result tampil dulu sebelum switch tab
+            switchView('result');
             switchResultTab('soal');
             try {
                 const fullPrompt = `Gunakan Blueprint/Kisi-kisi yang telah disepakati ini sebagai pedoman tunggal:\n\n${cachedBlueprintResultText}\n\nPerintah:\n${prompt2}`;
@@ -713,7 +729,10 @@
                 document.getElementById('res-soal').innerHTML = formatMarkdown(textResult);
                 endLoadingProgress();
                 setTimeout(() => showLoading(false), 500);
-                showToast('Naskah Asesmen & Pembahasan berhasil diterbitkan!', 'success');
+                showToast('✅ Soal & Pembahasan selesai! Blueprint masih ada di tab "Blueprint / Kisi-Kisi".', 'success');
+                // Tampilkan indikator badge dan hint navigasi
+                document.getElementById('rtab-soal-badge').classList.remove('hidden');
+                document.getElementById('tab-nav-hint').classList.remove('hidden');
                 // Tampilkan banner download untuk guest
                 if (!currentUser) showGuestDownloadBanner('soal');
                 saveToHistory('Generate Produk AI (' + selectedModel + ')', cachedBlueprintResultText, cachedSoalResultText);
