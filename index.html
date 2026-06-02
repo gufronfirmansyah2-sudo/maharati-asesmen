@@ -49,7 +49,7 @@
 
     <!-- URL BACKEND APPS SCRIPT ANDA -->
     <script>
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycby4FiDu9bFk2vG1AZbNrErGoj1QHA5ld_1eGdootCIdlfDOOebtDSG0jlt9QSujroWr/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbweqdpfQUXd8OKN4qC_z7hzbdyAZd_288ggDhXxIWGOlbiZn1LX07FaC3NVIEB3AxXa/exec";
     </script>
 
     <!-- Sidebar Menu -->
@@ -390,14 +390,20 @@
                 </div>
 
                 <div class="bg-white p-3 flex flex-wrap justify-between items-center border border-slate-200 rounded-xl shadow-sm gap-3 flex-shrink-0">
-                    <span class="text-xs text-slate-500 font-medium px-2">Gunakan tombol ekspor untuk file word siap diedit</span>
-                    <div class="flex gap-2">
+                    <!-- Tombol Step 2 — muncul setelah Step 1 selesai -->
+                    <div id="result-step2-btn" class="hidden">
+                        <button onclick="generateWizardStep2()" id="result-btn-step2-inner" class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:from-emerald-700 hover:to-teal-700 transition-all flex items-center gap-2 shadow-md">
+                            <span class="flex items-center justify-center w-5 h-5 rounded-full bg-white text-emerald-600 font-extrabold text-xs">2</span>
+                            Lanjut Generate Soal & Pembahasan
+                        </button>
+                    </div>
+                    <div class="flex gap-2 ml-auto">
                         <button onclick="copyResult()" class="text-xs bg-slate-100 border border-slate-200 px-4 py-2.5 rounded-lg font-bold text-slate-700 hover:bg-slate-200 transition-all flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> 
-                            Salin Teks Tab Aktif
+                            Salin Teks
                         </button>
-                        <button onclick="downloadAsWordDoc()" class="text-xs bg-blue-50 border border-blue-200 px-4 py-2.5 rounded-lg font-bold text-blue-700 hover:bg-blue-100 transition-all flex items-center gap-1.5 shadow-sm">
-                            💾 Download File Word (.doc)
+                        <button onclick="downloadAsWordDoc()" class="text-xs bg-blue-600 border border-blue-700 px-4 py-2.5 rounded-lg font-bold text-white hover:bg-blue-700 transition-all flex items-center gap-1.5 shadow-sm">
+                            💾 Download Word (.doc)
                         </button>
                     </div>
                 </div>
@@ -696,6 +702,8 @@
                 showToast('Blueprint berhasil dibuat! Silakan tinjau sebelum lanjut ke Langkah 2.', 'success');
                 // Tampilkan indikator badge di tab
                 document.getElementById('rtab-blueprint-badge').classList.remove('hidden');
+                // Tampilkan tombol Step 2 di result view
+                document.getElementById('result-step2-btn').classList.remove('hidden');
                 // Tampilkan banner download untuk guest
                 if (!currentUser) showGuestDownloadBanner('blueprint');
                 const btnStep2 = document.getElementById('btn-wizard-step2');
@@ -733,6 +741,8 @@
                 // Tampilkan indikator badge dan hint navigasi
                 document.getElementById('rtab-soal-badge').classList.remove('hidden');
                 document.getElementById('tab-nav-hint').classList.remove('hidden');
+                // Sembunyikan tombol Step 2 setelah selesai
+                document.getElementById('result-step2-btn').classList.add('hidden');
                 // Tampilkan banner download untuk guest
                 if (!currentUser) showGuestDownloadBanner('soal');
                 saveToHistory('Generate Produk AI (' + selectedModel + ')', cachedBlueprintResultText, cachedSoalResultText);
@@ -817,15 +827,30 @@
             // Konversi markdown ke HTML untuk Word
             marked.use({ breaks: true, gfm: true });
             const docBody = marked.parse(contentText);
+            // Blueprint pakai landscape karena tabelnya lebar, soal pakai portrait
+            const isBlueprint = currentResultTab === 'blueprint';
+            const pageStyle = isBlueprint
+                ? '@page { size: A4 landscape; margin: 1.5cm; }'
+                : '@page { size: A4 portrait; margin: 2cm; }';
             const fullDoc = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
 <head><title>${fileName}</title>
+<meta charset="UTF-8">
 <style>
-  body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; }
-  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
-  th { background: #f2f2f2; border: 1px solid #ccc; padding: 8px; font-weight: bold; text-align: left; }
-  td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
-  h1 { font-size: 16pt; color: #1a365d; } h2 { font-size: 14pt; color: #1a365d; }
-  h3 { font-size: 13pt; color: #2c5282; } h4 { font-size: 12pt; color: #2c5282; }
+  ${pageStyle}
+  body { font-family: Arial, sans-serif; font-size: ${isBlueprint ? '9' : '11'}pt; line-height: 1.5; }
+  /* Tabel — jangan pakai white-space:nowrap di Word, justru perlu wrap */
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; table-layout: fixed; word-wrap: break-word; }
+  th { background: #dce6f1; border: 1px solid #aaa; padding: 5px 7px; font-weight: bold; text-align: left; font-size: ${isBlueprint ? '8' : '10'}pt; vertical-align: top; word-wrap: break-word; }
+  td { border: 1px solid #aaa; padding: 5px 7px; vertical-align: top; font-size: ${isBlueprint ? '8' : '10'}pt; word-wrap: break-word; }
+  tr:nth-child(even) td { background: #f7f9fc; }
+  h1 { font-size: 14pt; color: #1a365d; margin: 16px 0 8px 0; }
+  h2 { font-size: 13pt; color: #1a365d; margin: 14px 0 6px 0; }
+  h3 { font-size: 12pt; color: #2c5282; margin: 12px 0 4px 0; }
+  h4 { font-size: 11pt; color: #2c5282; margin: 10px 0 4px 0; }
+  ul, ol { margin-left: 20px; margin-bottom: 8px; }
+  li { margin-bottom: 3px; }
+  p { margin-bottom: 6px; }
+  strong { font-weight: bold; }
 </style></head><body>${docBody}</body></html>`;
             const blob = new Blob(['\ufeff' + fullDoc], { type: 'application/msword' });
             const url = URL.createObjectURL(blob);
