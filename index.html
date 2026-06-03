@@ -168,7 +168,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v2.3 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v5.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -1696,11 +1696,13 @@
                 badge.className = "flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-300";
                 badge.innerHTML = `☕ <span id="user-name-display" class="ml-1">${currentUser.nama}</span> <span class="ml-1 text-[9px] bg-amber-300 px-1.5 py-0.5 rounded-full font-extrabold">SAHABAT</span>`;
                 document.getElementById('member-draft-controls').classList.remove('hidden');
-                // Tampilkan tombol admin jika email adalah admin
-                const adminEmails = ['gufronf16@gmail.com', 'gufron@maharati.id'];
-                if (adminEmails.includes(currentUser.email.toLowerCase())) {
+                // Tampilkan tombol admin jika level = 'Admin' (dari spreadsheet)
+                if (currentUser.level === 'Admin') {
                     const adminBtn = document.getElementById('nav-admin-btn');
                     if (adminBtn) adminBtn.classList.remove('hidden');
+                    // Badge khusus Admin
+                    badge.className = "flex items-center px-3 py-1.5 rounded-full bg-purple-100 text-purple-800 text-xs font-bold border border-purple-300";
+                    badge.innerHTML = `🛡️ <span id="user-name-display" class="ml-1">${currentUser.nama}</span> <span class="ml-1 text-[9px] bg-purple-300 px-1.5 py-0.5 rounded-full font-extrabold">ADMIN</span>`;
                 }
             }
         }
@@ -1747,9 +1749,8 @@
             }
             // Blokir akses langsung ke admin tanpa autentikasi
             if (viewId === 'admin') {
-                const adminPass = sessionStorage.getItem(ADMIN_PASS_KEY);
-                if (!adminPass) {
-                    showToast('Akses ditolak. Login admin diperlukan.', 'error');
+                if (!currentUser || currentUser.level !== 'Admin') {
+                    showToast('Akses ditolak. Login sebagai Admin diperlukan.', 'error');
                     return;
                 }
             }
@@ -1794,7 +1795,7 @@
             if (!confirm('Yakin ingin keluar dari akun?')) return;
             currentUser = null;
             sessionStorage.removeItem('maharati_user');
-            sessionStorage.removeItem(ADMIN_PASS_KEY); // Hapus sesi admin saat logout
+            // Sesi admin otomatis hilang karena berbasis currentUser
             // Reset UI
             document.getElementById('nav-auth-text').innerText = 'Sahabat Maharati';
             document.getElementById('nav-history-btn').classList.add('hidden');
@@ -2095,49 +2096,25 @@
         // =============================================
         // ADMIN PANEL
         // =============================================
-        const ADMIN_PASS_KEY = 'maharati_admin_pass'; // Simpan password, bukan flag boolean
-
+        // Admin teridentifikasi dari level 'Admin' di spreadsheet
+        // Tidak perlu password terpisah — sudah terverifikasi saat login biasa
         function checkAdminAccess() {
-            const savedPass = sessionStorage.getItem(ADMIN_PASS_KEY);
-            if (savedPass) {
-                // Verifikasi ulang ke backend — pastikan masih valid
-                callGASBackend('admin_login', { pass: savedPass }).then(res => {
-                    if (res.status === 'success') {
-                        switchView('admin'); loadAdminData();
-                    } else {
-                        sessionStorage.removeItem(ADMIN_PASS_KEY);
-                        promptAdminPass();
-                    }
-                });
+            if (!currentUser || currentUser.level !== 'Admin') {
+                showToast('Akses ditolak. Login sebagai Admin diperlukan.', 'error');
                 return;
             }
-            promptAdminPass();
-        }
-
-        function promptAdminPass() {
-            const pass = prompt('Masukkan password Admin:');
-            if (!pass) return;
-            callGASBackend('admin_login', { pass }).then(res => {
-                if (res.status === 'success') {
-                    sessionStorage.setItem(ADMIN_PASS_KEY, pass); // Simpan pass asli untuk request berikutnya
-                    switchView('admin');
-                    loadAdminData();
-                } else {
-                    showToast('Password admin salah.', 'error');
-                }
-            });
+            switchView('admin');
+            loadAdminData();
         }
 
         async function loadAdminData() {
-            const adminPass = sessionStorage.getItem(ADMIN_PASS_KEY);
-            if (!adminPass) {
+            if (!currentUser || currentUser.level !== 'Admin') {
                 showToast('Akses ditolak.', 'error');
                 switchView('home');
                 return;
             }
             showToast('Memuat data admin...', 'info');
-
-            const res = await callGASBackend('admin_get_data', { pass: adminPass });
+            const res = await callGASBackend('admin_get_data', { adminEmail: currentUser.email });
             if (res.status !== 'success') {
                 showToast('Gagal memuat data: ' + res.message, 'error'); return;
             }
@@ -2196,11 +2173,12 @@
 
         async function verifikasiDonasi(kode, btnEl) {
             if (!confirm(`Verifikasi donasi dengan kode ${kode}? Akun donatur akan langsung aktif.`)) return;
-            const adminPass = sessionStorage.getItem(ADMIN_PASS_KEY);
-            if (!adminPass) { showToast('Sesi admin habis. Login ulang.', 'error'); return; }
+            if (!currentUser || currentUser.level !== 'Admin') {
+                showToast('Akses ditolak.', 'error'); return;
+            }
             btnEl.disabled = true;
             btnEl.innerText = '...';
-            const res = await callGASBackend('admin_verify_donation', { kode, pass: adminPass });
+            const res = await callGASBackend('admin_verify_donation', { kode, adminEmail: currentUser.email });
             if (res.status === 'success') {
                 showToast(`Kode ${kode} berhasil diverifikasi!`, 'success');
                 loadAdminData();
