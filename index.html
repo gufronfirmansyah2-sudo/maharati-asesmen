@@ -152,7 +152,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v7.3 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v8.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -846,28 +846,36 @@
 
             const inputAizaSy = document.getElementById('input-aizasy');
             const inputAQ     = document.getElementById('input-aq');
+            const elA = document.getElementById('api-key-input');
+            const elQ = document.getElementById('aq-token-input');
 
             // Sembunyikan semua input dulu
             inputAizaSy && inputAizaSy.classList.add('hidden');
             inputAQ     && inputAQ.classList.add('hidden');
 
             if (val === 'aizaSyCustom') {
+                // Tampilkan input AIzaSy
                 inputAizaSy && inputAizaSy.classList.remove('hidden');
-                // Restore nilai tersimpan
-                const saved = localStorage.getItem('gemini_api_key') || '';
-                const el = document.getElementById('api-key-input');
-                if (el && !el.value) el.value = saved;
+                // Restore nilai AIzaSy dari localStorage
+                if (elA) elA.value = localStorage.getItem('gemini_api_key') || '';
+                // PENTING: Bersihkan AQ token field DAN hapus dari storage
+                // agar tidak ikut tersimpan ulang saat saveApiKey dipanggil
+                if (elQ) elQ.value = '';
+                localStorage.removeItem('aq_token');
+
             } else if (val === 'aqToken') {
+                // Tampilkan input AQ
                 inputAQ && inputAQ.classList.remove('hidden');
-                const saved = localStorage.getItem('aq_token') || '';
-                const el = document.getElementById('aq-token-input');
-                if (el && !el.value) el.value = saved;
+                // Restore nilai AQ dari localStorage
+                if (elQ) elQ.value = localStorage.getItem('aq_token') || '';
+                // PENTING: Bersihkan AIzaSy field DAN hapus dari storage
+                if (elA) elA.value = '';
+                localStorage.removeItem('gemini_api_key');
+
             } else {
-                // Pilih system key → hapus custom keys
+                // Pilih system key → hapus SEMUA custom key dari storage dan input
                 localStorage.removeItem('gemini_api_key');
                 localStorage.removeItem('aq_token');
-                const elA = document.getElementById('api-key-input');
-                const elQ = document.getElementById('aq-token-input');
                 if (elA) elA.value = '';
                 if (elQ) elQ.value = '';
             }
@@ -955,28 +963,41 @@
         }
 
         function saveApiKey() {
-            const aizsaKey = document.getElementById('api-key-input').value.trim();
-            const aqKey    = document.getElementById('aq-token-input').value.trim();
+            const activeChoice = localStorage.getItem(SYSTEM_KEY_PREF) || 'default';
 
-            // Simpan AIzaSy key
-            if (aizsaKey) {
-                localStorage.setItem('gemini_api_key', aizsaKey);
-            } else {
-                localStorage.removeItem('gemini_api_key');
-            }
-
-            // Simpan AQ. token terpisah
-            if (aqKey) {
-                if (!aqKey.startsWith('AQ.')) {
-                    showToast('Format token AQ. harus diawali "AQ." — periksa kembali.', 'error');
-                    return;
+            if (activeChoice === 'aizaSyCustom') {
+                // Simpan HANYA AIzaSy key, pastikan AQ token bersih
+                const aizsaKey = document.getElementById('api-key-input').value.trim();
+                localStorage.removeItem('aq_token'); // Pastikan tidak ada AQ sisa
+                if (aizsaKey) {
+                    localStorage.setItem('gemini_api_key', aizsaKey);
+                    showToast('API Key (AIzaSy...) berhasil disimpan!', 'success');
+                } else {
+                    localStorage.removeItem('gemini_api_key');
+                    showToast('Key dikosongkan — kembali ke kunci bawaan sistem.', 'info');
                 }
-                localStorage.setItem('aq_token', aqKey);
-                showToast('AQ. Token & konfigurasi API berhasil disimpan!', 'success');
+
+            } else if (activeChoice === 'aqToken') {
+                // Simpan HANYA AQ token, pastikan AIzaSy key bersih
+                const aqKey = document.getElementById('aq-token-input').value.trim();
+                localStorage.removeItem('gemini_api_key'); // Pastikan tidak ada AIzaSy sisa
+                if (aqKey) {
+                    if (!aqKey.startsWith('AQ.')) {
+                        showToast('Format token AQ. harus diawali "AQ." — periksa kembali.', 'error');
+                        return;
+                    }
+                    localStorage.setItem('aq_token', aqKey);
+                    showToast('AQ. Token berhasil disimpan!', 'success');
+                } else {
+                    localStorage.removeItem('aq_token');
+                    showToast('Token dikosongkan — kembali ke kunci bawaan sistem.', 'info');
+                }
+
             } else {
+                // System key dipilih → pastikan semua custom key bersih
+                localStorage.removeItem('gemini_api_key');
                 localStorage.removeItem('aq_token');
-                if (aizsaKey) showToast('API Key disimpan!', 'success');
-                else showToast('Kembali menggunakan kunci bawaan sistem.', 'info');
+                showToast('Konfigurasi jalur API sistem berhasil disimpan!', 'success');
             }
 
             checkApiKey();
@@ -1029,7 +1050,7 @@
 
         function buildPrompt1(d) {
             const isNonTest = ['Praktik', 'Produk', 'Projek', 'Portofolio'].includes(d.jenisAsesmen);
-            return `Tahap 1 -Blueprint\nPENTING: Langsung tulis dokumen blueprint tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau kalimat serupa. Output adalah dokumen profesional siap pakai.\n\nAnda adalah ahli asesmen pendidikan dan perancang evaluasi pembelajaran Kurikulum Merdeka dengan pendekatan pembelajaran mendalam.\nTugas Anda adalah menyusun blueprint/kisi-kisi asesmen sumatif yang valid, proporsional, kontekstual, dan benar-benar mengukur ketercapaian Capaian Pembelajaran (CP), diturunkan ke TP, lalu ke indikator.\nJANGAN buat produk asesmennya dulu — hanya blueprint dalam bentuk TEXT/MARKDOWN.\n\n==================================================\nIDENTITAS ASESMEN\n==================================================\n-Mata pelajaran: ${d.mapel}\n-Jenjang : ${d.jenjang}\n-Kelas/Semester: ${d.kelas} (Fase ${d.fase})\n-Bab Materi: ${d.babGabung}\n-Jenis asesmen: ${d.tujuan} (${d.jenisAsesmen})\nKonteks lokal: ${d.lokasi}\nWaktu: ${d.waktu} Menit\n${!isNonTest ? `Jumlah soal: ${d.jumlah} Soal | Komposisi: ${d.komposisi}` : `Ketentuan Asesmen: Berupa Rubrik/Tugas Kinerja terstruktur`}\n\n==================================================\nCAPAIAN PEMBELAJARAN (CP)\n==================================================\n${d.cp}\n\n==================================================\nTUJUAN PEMBELAJARAN (TP)\n==================================================\n${d.tpGabung}\n\n==================================================\nLINGKUP MATERI\n==================================================\n${d.lingkupGabung || 'Sesuai dengan Bab dan TP di atas.'}\n\n==================================================\nKETENTUAN ASESMEN\n==================================================\n${!isNonTest ? `Jumlah soal: ${d.jumlah} (${d.komposisi})\nDistribusi Bloom: ${d.distribusi}\n\nDistribusi DoK:\n- DoK 1 = recall dasar\n- DoK 2 = aplikasi konsep\n- DoK 3 = penalaran strategis\n- DoK 4 = investigasi/refleksi mendalam` : `Sajikan kriteria asesmen yang relevan (misalnya dimensi rubrik: Perencanaan, Pelaksanaan, Hasil Akhir/Produk, dan Presentasi).`}\n\n==================================================\nKONTEKS SOAL / TUGAS\n==================================================\nGunakan konteks yang dekat dengan kehidupan siswa di ${d.lokasi} seperti: Sosial, Budaya, Ekonomi, geografi, kebiasaan lokal.\n\n==================================================\nATURAN KUALITAS\n==================================================\n1. Seluruh asesmen mengukur ketercapaian CP. Hindari hafalan langsung.\n2. Harus menuntut analisis/evaluasi.\n${!isNonTest ? `3. Minimal 25% soal menggunakan stimulus (gambar deskripsi, tabel, grafik, teks).\n4. Minimal 15% Literasi, 15% Numerasi.` : `3. Tugas atau proyek harus aplikatif dan dapat diselesaikan dalam rentang waktu yang wajar.`}\n\n==================================================\nTUGAS\n==================================================\nBuat Blueprint dengan struktur:\nTABEL 1: CP dan TP lengkap.\n${!isNonTest ? `TABEL 2 (Matriks Kisi-kisi):\nNo | Elemen CP | TP | Indikator Soal (sertakan konteks ${d.lokasi}) | Materi | Bloom/DoK | Stimulus\n\nTampilkan rekap:\nTabel Distribusi (Target vs Aktual) untuk LOTS, MOTS, HOTS, Stimulus, Literasi, Numerasi.` : `TABEL 2 (Kisi-kisi Kinerja):\nElemen CP | TP | Indikator Kinerja (sertakan konteks ${d.lokasi}) | Materi | Kriteria Keberhasilan`}\n`;
+            return `Tahap 1 -Blueprint\nPENTING: Langsung tulis dokumen blueprint tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau kalimat serupa. Output adalah dokumen profesional siap pakai.\n\nAnda adalah ahli asesmen pendidikan dan perancang evaluasi pembelajaran Kurikulum Merdeka dengan pendekatan pembelajaran mendalam.\nTugas Anda adalah menyusun blueprint/kisi-kisi asesmen sumatif yang valid, proporsional, kontekstual, dan benar-benar mengukur ketercapaian Capaian Pembelajaran (CP), diturunkan ke TP, lalu ke indikator.\nJANGAN buat produk asesmennya dulu — hanya blueprint dalam bentuk TEXT/MARKDOWN.\n\n==================================================\nIDENTITAS ASESMEN\n==================================================\n-Mata pelajaran: ${d.mapel}\n-Jenjang : ${d.jenjang}\n-Kelas/Semester: ${d.kelas} (Fase ${d.fase})\n-Bab Materi: ${d.babGabung}\n-Jenis asesmen: ${d.tujuan} (${d.jenisAsesmen})\nKonteks lokal: ${d.lokasi}\nWaktu: ${d.waktu} Menit\n${!isNonTest ? `Jumlah soal: ${d.jumlah} Soal | Komposisi: ${d.komposisi}` : `Ketentuan Asesmen: Berupa Rubrik/Tugas Kinerja terstruktur`}\n\n==================================================\nCAPAIAN PEMBELAJARAN (CP)\n==================================================\n${d.cp}\n\n==================================================\nTUJUAN PEMBELAJARAN (TP)\n==================================================\n${d.tpGabung}\n\n==================================================\nLINGKUP MATERI\n==================================================\n${d.lingkupGabung || 'Sesuai dengan Bab dan TP di atas.'}\n\n==================================================\nKETENTUAN ASESMEN\n==================================================\n${!isNonTest ? `Jumlah soal: ${d.jumlah} (${d.komposisi})\nDistribusi Bloom: ${d.distribusi}\n\nDistribusi DoK:\n- DoK 1 = recall dasar\n- DoK 2 = aplikasi konsep\n- DoK 3 = penalaran strategis\n- DoK 4 = investigasi/refleksi mendalam` : `Sajikan kriteria asesmen yang relevan (misalnya dimensi rubrik: Perencanaan, Pelaksanaan, Hasil Akhir/Produk, dan Presentasi).`}\n\n==================================================\nKONTEKS SOAL / TUGAS\n==================================================\nGunakan konteks yang dekat dengan kehidupan siswa di ${d.lokasi} seperti: Sosial, Budaya, Ekonomi, geografi, kebiasaan lokal.\n\n==================================================\nATURAN KUALITAS\n==================================================\n1. Seluruh asesmen mengukur ketercapaian CP. Hindari hafalan langsung.\n2. Harus menuntut analisis/evaluasi.\n${!isNonTest ? `3. Minimal 25% soal menggunakan stimulus (gambar deskripsi, tabel, grafik, teks).\n4. Minimal 15% Literasi, 15% Numerasi.` : `3. Tugas atau proyek harus aplikatif dan dapat diselesaikan dalam rentang waktu yang wajar.`}\n\n==================================================\nTUGAS\n==================================================\nBuat Blueprint dengan struktur:\nTABEL 1: CP dan TP lengkap.\n${!isNonTest ? `\u26a0\ufe0f URUTAN SOAL WAJIB: Soal Pilihan Ganda DULU (nomor 1 hingga selesai), baru soal Uraian di nomor AKHIR. DILARANG menyisipkan Uraian di tengah soal PG.\nTABEL 2 (Matriks Kisi-kisi):\n| No | Bentuk Soal | Elemen CP | TP | Indikator Soal (konteks ${d.lokasi}) | Materi | Bloom/DoK | Stimulus |\n|---|---|---|---|---|---|---|---|\n\nTampilkan rekap:\nTabel Distribusi (Target vs Aktual) untuk LOTS, MOTS, HOTS, Stimulus, Literasi, Numerasi.` : `TABEL 2 (Kisi-kisi Kinerja):\nElemen CP | TP | Indikator Kinerja (sertakan konteks ${d.lokasi}) | Materi | Kriteria Keberhasilan`}\n`;
         }
 
         function buildPrompt2(d) {
@@ -1057,7 +1078,7 @@
             const jumlahTotal = parseInt(d.jumlah) || 40;
             const nomorMulaiUraian = jumlahTotal - jumlahUraian + 1;
 
-            return `Tahap 2 - Naskah Soal\nPENTING: Langsung tulis naskah soal tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau sejenisnya. Output adalah dokumen profesional siap pakai.\n\nBerdasarkan blueprint/kisi-kisi asesmen yang telah dibuat sebelumnya, buat paket soal lengkap dalam 2 bagian berurutan.\n\n⚠️ KERJAKAN BERURUTAN: Selesaikan Bagian A dulu, baru Bagian B. Jangan berhenti sebelum keduanya selesai.\n\n⚠️ URUTAN SOAL WAJIB: Soal Pilihan Ganda dikerjakan LEBIH DULU (nomor 1 s.d. ${nomorMulaiUraian > 1 ? nomorMulaiUraian - 1 : jumlahTotal}), baru soal Uraian di nomor AKHIR (nomor ${nomorMulaiUraian > 1 ? nomorMulaiUraian + ' s.d. ' + jumlahTotal : '-'}). DILARANG menyisipkan soal Uraian di tengah-tengah soal Pilihan Ganda.\n\n==================================================\nATURAN UMUM\n==================================================\n1. Ikuti blueprint/kisi-kisi — nomor, level, konteks konsisten.\n2. Jangan mengubah distribusi Bloom dan DoK.\n3. Pastikan soal tetap mengarah pada ketercapaian CP.\n4. Hindari hafalan langsung.\n5. Gunakan bahasa yang jelas, natural, dan tidak ambigu.\n6. Setiap soal hanya memiliki satu jawaban benar.\n7. Pilihan jawaban: ${pilihanJawaban}\n8. Pilihan Jawaban homogen, panjang seimbang — hindari satu opsi jauh lebih panjang dari opsi lain.\n\n==================================================\nATURAN DISTRAKTOR\n==================================================\nDistaktor harus:\n- Logis dan relevan dengan materi\n- Mencerminkan miskonsepsi umum siswa\n- Tidak terlalu mudah dieliminasi\n- Panjang opsi seimbang satu sama lain\n\n==================================================\nATURAN STIMULUS\n==================================================\nPRINSIP UTAMA:\n- Stimulus harus menjadi alat berpikir peserta didik.\n- Peserta didik TIDAK BOLEH menjawab soal hanya dengan mengingat materi tanpa membaca stimulus.\n- Jika jawaban dapat ditebak tanpa membaca stimulus, soal harus direvisi.\n\nStimulus harus: relevan dengan indikator, membantu proses bernalar, kontekstual, realistis, tidak memuat jawaban secara eksplisit.\n\nDistribusi stimulus ideal:\n- Berita/artikel aktual (parafrase) : ±30%\n- Teks informasi/bacaan : ±20%\n- Studi kasus : ±15%\n- Tabel data : ±10%\n- Grafik/diagram : ±10%\n- Gambar analitis : ±10%\n- Infografis : ±5%\n\nHindari penggunaan jenis stimulus yang sama berulang.\n\nLARANGAN KERAS:\nDILARANG mengarang: berita, statistik, hasil survei, hasil penelitian, kutipan tokoh, data pemerintah, data BPS, data ekonomi — jika tidak ada sumber yang jelas.\n\nJika sumber nyata tersedia: gunakan & parafrase (jangan ubah makna utama).\nJika sumber tidak tersedia: gunakan simulasi/ilustrasi dengan label wajib:\n[SIMULASI] / [KASUS HIPOTETIK] / [DATA CONTOH] / [ILUSTRASI]\n\nPenulisan sumber: "Berdasarkan berita dari Kompas.com (parafrase):" atau "[KASUS HIPOTETIK]"\n\nFormat grafik wajib:\n[GRAFIK]\nJudul Grafik: ...\nSumbu X: ...\nSumbu Y: ...\nData: ...\n\nFormat gambar: [ILUSTRASI: deskripsi rinci agar guru dapat membuat/mencari gambar yang sesuai]\nFormat infografis: [INFOGRAFIS: isi utama yang dapat dianalisis siswa]\n\nPanjang stimulus:\n- LOTS (C1-C2): 0–75 kata\n- MOTS (C3-C4): 80–150 kata\n- HOTS (C5-C6): 150–300 kata\n\nSoal HOTS harus menuntut salah satu: membandingkan, menghubungkan, mengevaluasi, mengambil keputusan, menyimpulkan, memprediksi, memberikan solusi, menilai argumentasi.\nMinimal 80% soal HOTS wajib menggunakan stimulus.\n\nCek stimulus sebelum lanjut:\n✓ Stimulus membantu penalaran?\n✓ Stimulus relevan dengan indikator?\n✓ Tidak ada fakta yang dikarang?\n✓ Jika simulasi sudah diberi label?\n✓ Variasi stimulus sudah seimbang?\n✓ HOTS tidak bisa dijawab tanpa membaca stimulus?\n\n==================================================\nFORMAT OUTPUT\n==================================================\nBAGIAN A — SOAL ASESMEN (TANPA KUNCI)\n- Header: nama sekolah, mata pelajaran, kelas, waktu\n- Petunjuk umum mengerjakan\n- Semua soal, urutan: Pilihan Ganda dulu → Uraian di nomor akhir\n\nFormat setiap soal PG:\nNo. [X]\n[Stimulus jika ada]\n[Pertanyaan]\nA. ...\nB. ...\nC. ...\n(dst)\n\nFormat soal Uraian (wajib di nomor akhir):\nNo. [X]\n[Stimulus jika ada]\n[Pertanyaan]\n(Jawab minimal [N] kalimat)\n\n---\nBAGIAN B — KUNCI & PEMBAHASAN\n(Mulai SETELAH semua soal Bagian A selesai)\n\n1. Tabel Kunci Cepat (format Markdown Table):\n| No | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |\n| Jwb | | | | | | | | | | |\n(lanjutkan baris untuk 11–20, 21–30, 31–40, dst.)\n\n2. Kunci dan Pembahasan per soal:\nATURAN PEMBAHASAN:\n- LOTS (C1-C2): 2 kalimat\n- MOTS (C3-C4): 3 kalimat\n- HOTS (C5-C6): 4 kalimat\n- Fokus pada KONSEP — jangan menulis ulang soal dan pilihan jawaban\n- Sertakan: Indikator kompetensi yang diukur\n- Jelaskan: mengapa jawaban benar\n- Tambahkan di akhir tiap pembahasan: "Miskonsepsi Umum: ..."\n- Khusus soal HOTS, tambahkan:\n"Catatan Pedagogis: ... (kemungkinan penyebab siswa salah + saran remedial singkat)"\n\n3. Analisis Ketercapaian TP:\n| TP | Jumlah Soal | Catatan |\n|---|---|---|\n\n4. Rekomendasi Tindak Lanjut:\n- Remedial (untuk siswa yang belum mencapai KKM)\n- Pengayaan (untuk siswa yang telah melampaui KKM)\n\n==================================================\nCEK SEBELUM SELESAI\n==================================================\nBagian A:\n✓ Urutan soal: Pilihan Ganda dulu, Uraian di nomor akhir?\n✓ Jumlah soal sesuai komposisi blueprint?\n✓ Semua opsi homogen dan panjang seimbang?\n✓ Stimulus relevan dan membantu penalaran?\n✓ Konteks lokal ${d.lokasi} muncul secara natural?\n✓ Tidak ada hafalan murni?\n\nBagian B:\n✓ Semua soal ada kunci dan pembahasan?\n✓ Tabel kunci cepat lengkap?\n✓ Catatan Pedagogis hanya untuk soal HOTS?\n✓ Analisis TP dan rekomendasi tindak lanjut ada?`;
+            return `Tahap 2 - Naskah Soal\nPENTING: Langsung tulis naskah soal tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau sejenisnya. Output adalah dokumen profesional siap pakai.\n\nBerdasarkan blueprint/kisi-kisi asesmen yang telah dibuat sebelumnya, buat paket soal lengkap dalam 2 bagian berurutan.\n\n⚠️ KERJAKAN BERURUTAN: Selesaikan Bagian A dulu, baru Bagian B. Jangan berhenti sebelum keduanya selesai.\n\n⚠️ URUTAN SOAL WAJIB: Soal Pilihan Ganda dikerjakan LEBIH DULU (nomor 1 s.d. ${nomorMulaiUraian > 1 ? nomorMulaiUraian - 1 : jumlahTotal}), baru soal Uraian di nomor AKHIR (nomor ${nomorMulaiUraian > 1 ? nomorMulaiUraian + ' s.d. ' + jumlahTotal : '-'}). DILARANG menyisipkan soal Uraian di tengah-tengah soal Pilihan Ganda.\n\n==================================================\nATURAN UMUM\n==================================================\n1. Ikuti blueprint/kisi-kisi — nomor, level, konteks konsisten.\n2. Jangan mengubah distribusi Bloom dan DoK.\n3. Pastikan soal tetap mengarah pada ketercapaian CP.\n4. Hindari hafalan langsung.\n5. Gunakan bahasa yang jelas, natural, dan tidak ambigu.\n6. Setiap soal hanya memiliki satu jawaban benar.\n7. Pilihan jawaban: ${pilihanJawaban}\n8. Pilihan Jawaban homogen, panjang seimbang — hindari satu opsi jauh lebih panjang dari opsi lain.\n\n==================================================\nATURAN DISTRAKTOR\n==================================================\nDistaktor harus:\n- Logis dan relevan dengan materi\n- Mencerminkan miskonsepsi umum siswa\n- Tidak terlalu mudah dieliminasi\n- Panjang opsi seimbang satu sama lain\n\n==================================================\nATURAN STIMULUS\n==================================================\nPRINSIP UTAMA:\n- Stimulus harus menjadi alat berpikir peserta didik.\n- Peserta didik TIDAK BOLEH menjawab soal hanya dengan mengingat materi tanpa membaca stimulus.\n- Jika jawaban dapat ditebak tanpa membaca stimulus, soal harus direvisi.\n\nStimulus harus: relevan dengan indikator, membantu proses bernalar, kontekstual, realistis, tidak memuat jawaban secara eksplisit.\n\nDistribusi stimulus ideal:\n- Berita/artikel aktual (parafrase) : ±30%\n- Teks informasi/bacaan : ±20%\n- Studi kasus : ±15%\n- Tabel data : ±10%\n- Grafik/diagram : ±10%\n- Gambar analitis : ±10%\n- Infografis : ±5%\n\nHindari penggunaan jenis stimulus yang sama berulang.\n\nLARANGAN KERAS:\nDILARANG mengarang: berita, statistik, hasil survei, hasil penelitian, kutipan tokoh, data pemerintah, data BPS, data ekonomi — jika tidak ada sumber yang jelas.\n\nATURAN STIMULUS TEKS (berita, teks informasi, studi kasus, tabel data):\n- Tulis langsung isi stimulus — natural, mengalir, seperti teks bacaan nyata\n- Jika sumber nyata: cantumkan singkat di akhir. Contoh: (Sumber: Kompas.com, parafrase)\n- Jika tidak ada sumber: tulis sebagai kasus fiktif dengan nama netral (Siswa A, Desa Y, Perusahaan Z)\n- DILARANG menulis header/label seperti [SIMULASI], [KASUS HIPOTETIK], [DATA CONTOH] yang terlihat oleh siswa\n- Stimulus harus tampak natural, bukan berlabel\n\nATURAN STIMULUS VISUAL (grafik, gambar, infografis):\nVisual WAJIB ditulis dalam kotak placeholder berikut agar guru tahu bagian mana yang perlu digenerate dengan AI Image Generator:\n\nFormat GRAFIK:\n> 📊 **[GRAFIK — Buat dengan AI Generator Gambar]**\n> Judul: ...\n> Sumbu X: ... | Sumbu Y: ...\n> Data: ...\n> Deskripsi visual: ...\n\nFormat ILUSTRASI/GAMBAR:\n> 🖼️ **[ILUSTRASI — Buat dengan AI Generator Gambar]**\n> Deskripsi detail: ...\n\nFormat INFOGRAFIS:\n> 📋 **[INFOGRAFIS — Buat dengan AI Generator Gambar]**\n> Konten utama: ...\n> Elemen visual yang perlu dimuat: ...\n\nPanjang stimulus:\n- LOTS (C1-C2): 0–75 kata\n- MOTS (C3-C4): 80–150 kata\n- HOTS (C5-C6): 150–300 kata\n\nSoal HOTS harus menuntut salah satu: membandingkan, menghubungkan, mengevaluasi, mengambil keputusan, menyimpulkan, memprediksi, memberikan solusi, menilai argumentasi.\nMinimal 80% soal HOTS wajib menggunakan stimulus.\n\nCek stimulus sebelum lanjut:\n✓ Stimulus membantu penalaran?\n✓ Stimulus relevan dengan indikator?\n✓ Tidak ada fakta yang dikarang?\n✓ Jika simulasi sudah diberi label?\n✓ Variasi stimulus sudah seimbang?\n✓ HOTS tidak bisa dijawab tanpa membaca stimulus?\n\n==================================================\nFORMAT OUTPUT\n==================================================\nBAGIAN A — SOAL ASESMEN (TANPA KUNCI)\n- Header: nama sekolah, mata pelajaran, kelas, waktu\n- Petunjuk umum mengerjakan\n- Semua soal, urutan: Pilihan Ganda dulu → Uraian di nomor akhir\n\nFormat setiap soal PG:\nNo. [X]\n[Stimulus jika ada]\n[Pertanyaan]\nA. ...\nB. ...\nC. ...\n(dst)\n\nFormat soal Uraian (wajib di nomor akhir):\nNo. [X]\n[Stimulus jika ada]\n[Pertanyaan]\n(Jawab minimal [N] kalimat)\n\n---\nBAGIAN B — KUNCI & PEMBAHASAN\n(Mulai SETELAH semua soal Bagian A selesai)\n\n1. Tabel Kunci Cepat (format Markdown Table):\n| No | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |\n| Jwb | | | | | | | | | | |\n(lanjutkan baris untuk 11–20, 21–30, 31–40, dst.)\n\n2. Kunci dan Pembahasan per soal:\nATURAN PEMBAHASAN:\n- LOTS (C1-C2): 2 kalimat\n- MOTS (C3-C4): 3 kalimat\n- HOTS (C5-C6): 4 kalimat\n- Fokus pada KONSEP — jangan menulis ulang soal dan pilihan jawaban\n- Sertakan: Indikator kompetensi yang diukur\n- Jelaskan: mengapa jawaban benar\n- Tambahkan di akhir tiap pembahasan: "Miskonsepsi Umum: ..."\n- Khusus soal HOTS, tambahkan:\n"Catatan Pedagogis: ... (kemungkinan penyebab siswa salah + saran remedial singkat)"\n\n3. Analisis Ketercapaian TP:\n| TP | Jumlah Soal | Catatan |\n|---|---|---|\n\n4. Rekomendasi Tindak Lanjut:\n- Remedial (untuk siswa yang belum mencapai KKM)\n- Pengayaan (untuk siswa yang telah melampaui KKM)\n\n==================================================\nCEK SEBELUM SELESAI\n==================================================\nBagian A:\n✓ Urutan soal: Pilihan Ganda dulu, Uraian di nomor akhir?\n✓ Jumlah soal sesuai komposisi blueprint?\n✓ Semua opsi homogen dan panjang seimbang?\n✓ Stimulus relevan dan membantu penalaran?\n✓ Konteks lokal ${d.lokasi} muncul secara natural?\n✓ Tidak ada hafalan murni?\n\nBagian B:\n✓ Semua soal ada kunci dan pembahasan?\n✓ Tabel kunci cepat lengkap?\n✓ Catatan Pedagogis hanya untuk soal HOTS?\n✓ Analisis TP dan rekomendasi tindak lanjut ada?`;
         }
 
         // [FIX 3] Ganti formatMarkdown & hapus renderHTMLTable — gunakan marked.js
