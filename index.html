@@ -407,15 +407,52 @@
                             <option value="gemini-2.5-pro">Google Gemini 2.5 Pro (Penalaran Tinggi, Butuh Kuota)</option>
                         </select>
                     </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Gunakan Kunci API Mandiri (Opsional)</label>
+                    <!-- Pilihan Key Sistem untuk Sahabat Maharati -->
+                    <div id="sahabat-key-section" class="hidden mb-5">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">☕ Pilih Jalur API (Sahabat Maharati)</label>
+                        <div class="space-y-2" id="system-key-options">
+                            <label class="flex items-center gap-3 p-3 border-2 border-amber-300 bg-amber-50 rounded-xl cursor-pointer hover:bg-amber-100 transition-all">
+                                <input type="radio" name="system-key" value="sahabat" class="accent-amber-500" checked onchange="onSystemKeyChange(this.value)">
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-amber-900">⭐ Sahabat Maharati</p>
+                                    <p class="text-xs text-amber-700 font-mono">AIzaSyDjVj...YXw8 <span class="text-amber-500">(Jalur khusus & kuota terpisah)</span></p>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <input type="radio" name="system-key" value="default" class="accent-blue-500" onchange="onSystemKeyChange(this.value)">
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-slate-700">📡 Maharati Default</p>
+                                    <p class="text-xs text-slate-500 font-mono">AIzaSyCz98...tYA</p>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <input type="radio" name="system-key" value="opsional" class="accent-slate-500" onchange="onSystemKeyChange(this.value)">
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-slate-700">🔄 Maharati Opsional</p>
+                                    <p class="text-xs text-slate-500 font-mono">AIzaSyC-k1...lAo</p>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <input type="radio" name="system-key" value="custom" class="accent-indigo-500" onchange="onSystemKeyChange(this.value)">
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-slate-700">🔑 Gunakan Key Pribadi</p>
+                                    <p class="text-xs text-slate-500">Masukkan key Anda sendiri di bawah</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-6" id="custom-key-section">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Kunci API Pribadi <span id="custom-key-label-extra" class="text-slate-400 font-normal text-xs">(Opsional — kosongkan untuk pakai kunci bawaan)</span></label>
                         <input type="password" id="api-key-input" placeholder="AIzaSy... atau AQ.Ab8... (kedua format didukung)" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono">
-                        <p class="text-xs text-slate-400 mt-1.5">✅ Format <code class="bg-slate-100 px-1 rounded">AIzaSy...</code> — API Key standar Google AI Studio &nbsp;|&nbsp; ✅ Format <code class="bg-slate-100 px-1 rounded">AQ.Ab8...</code> — OAuth token (support Bearer)</p>
-                        <div class="mt-3 flex items-center justify-between">
-                            <span class="text-xs text-slate-500">Kosongkan kolom ini untuk kembali menggunakan Kunci Bawaan.</span>
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1">
-                                Dapatkan Kunci API Gratis
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                            <p class="text-xs text-slate-400">✅ <code class="bg-slate-100 px-1 rounded">AIzaSy...</code> — via GAS server (lebih stabil)</p>
+                            <p class="text-xs text-amber-500">⚡ <code class="bg-amber-50 px-1 rounded">AQ.Ab8...</code> — via browser langsung (expired ~1 jam)</p>
+                        </div>
+                        <div class="mt-2 flex items-center justify-between">
+                            <span class="text-xs text-slate-400"></span>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-blue-600 font-semibold hover:underline flex items-center gap-1">
+                                Buat key gratis di Google AI Studio →
                             </a>
                         </div>
                     </div>
@@ -770,26 +807,60 @@
 
         function addBab() { addBabWithValues('', '', ''); }
 
+        // Mapping nama pilihan → preferensi tersimpan
+        const SYSTEM_KEY_PREF = 'maharati_system_key_pref';
+
+        function onSystemKeyChange(val) {
+            localStorage.setItem(SYSTEM_KEY_PREF, val);
+            const customSection = document.getElementById('custom-key-section');
+            const labelExtra = document.getElementById('custom-key-label-extra');
+            if (val === 'custom') {
+                customSection && customSection.classList.remove('hidden');
+                if (labelExtra) labelExtra.innerText = '(Wajib diisi)';
+            } else {
+                document.getElementById('api-key-input').value = '';
+                localStorage.removeItem('gemini_api_key');
+                customSection && customSection.classList.add('hidden');
+            }
+        }
+
         function updateApiLevelInfo() {
             const el = document.getElementById('api-level-info');
             const txt = document.getElementById('api-level-info-text');
+            const sahabatSection = document.getElementById('sahabat-key-section');
+            const customSection = document.getElementById('custom-key-section');
             if (!el || !txt) return;
+
+            const isSahabat = currentUser?.level === 'Sahabat Maharati';
             const customKey = localStorage.getItem('gemini_api_key');
+            const sysPref = localStorage.getItem(SYSTEM_KEY_PREF) || 'sahabat';
+
+            if (sahabatSection) {
+                isSahabat ? sahabatSection.classList.remove('hidden') : sahabatSection.classList.add('hidden');
+            }
+            if (isSahabat) {
+                const radio = document.querySelector(`input[name="system-key"][value="${sysPref}"]`);
+                if (radio) radio.checked = true;
+                if (sysPref !== 'custom') {
+                    customSection && customSection.classList.add('hidden');
+                } else {
+                    customSection && customSection.classList.remove('hidden');
+                }
+            }
+
             if (customKey) {
                 el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-emerald-50 border-emerald-200 text-emerald-700";
-                txt.innerText = "Menggunakan Kunci API Pribadi Anda — kunci bawaan sistem diabaikan.";
-            } else if (currentUser?.level === 'Donatur') {
+                const aqBadge = customKey.startsWith('AQ.') ? ' <span class="bg-amber-100 text-amber-700 px-1.5 rounded font-bold">AQ. via browser</span>' : '';
+                txt.innerHTML = '✅ Menggunakan Kunci API Pribadi' + aqBadge;
+            } else if (isSahabat) {
+                const labels = {sahabat:'⭐ Sahabat Maharati', default:'📡 Maharati Default', opsional:'🔄 Maharati Opsional', custom:'🔑 Key Pribadi'};
                 el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-amber-50 border-amber-200 text-amber-800";
-                txt.innerHTML = "☕ <strong>Sahabat Maharati</strong> — menggunakan jalur <strong>Sahabat Maharati</strong> (jalur & kuota khusus).";
-            } else if (currentUser) {
-                el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-blue-50 border-blue-200 text-blue-700";
-                txt.innerHTML = "🎓 <strong>Member</strong> — menggunakan kunci <strong>Maharati Default</strong>.";
+                txt.innerHTML = '☕ <strong>Sahabat Maharati</strong> — jalur aktif: <strong>' + (labels[sysPref] || '⭐ Sahabat Maharati') + '</strong>';
             } else {
                 el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-slate-50 border-slate-200 text-slate-600";
                 txt.innerHTML = "👤 <strong>Mode Tamu</strong> — menggunakan kunci <strong>Maharati Default</strong>.";
             }
         }
-
         function checkApiKey() {
             const key = localStorage.getItem('gemini_api_key');
             const statusText = document.getElementById('api-key-status-text');
@@ -914,11 +985,53 @@
             return marked.parse(cleanAIResponse(text));
         }
 
+        // Panggil Gemini langsung dari browser (untuk AQ. token yang butuh browser context)
+        async function callGeminiDirect(model, apiKey, prompt) {
+            const models = [model, 'gemini-2.5-flash', 'gemini-2.0-flash'];
+            const versions = ['v1beta', 'v1'];
+            let lastErr = '';
+            for (const m of models) {
+                for (const v of versions) {
+                    const url = `https://generativelanguage.googleapis.com/${v}/models/${m}:generateContent`;
+                    try {
+                        const resp = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${apiKey}`
+                            },
+                            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                        });
+                        const data = await resp.json();
+                        if (resp.ok && data.candidates) {
+                            return data.candidates[0].content.parts[0].text;
+                        }
+                        if (resp.status === 401 || resp.status === 403) {
+                            throw new Error('Token AQ. tidak valid atau sudah expired. Buat token baru dari Google AI Studio dan masukkan kembali di Pengaturan.');
+                        }
+                        lastErr = data.error?.message || `HTTP ${resp.status}`;
+                    } catch(e) {
+                        if (e.message.includes('expired') || e.message.includes('tidak valid')) throw e;
+                        lastErr = e.message;
+                    }
+                }
+            }
+            throw new Error('Semua model gagal (direct): ' + lastErr);
+        }
+
         async function callGeminiAPI(selectedModel, apiKey, prompt) {
+            // AQ. token HARUS dipanggil dari browser langsung
+            // tidak bisa lewat GAS server karena butuh Google browser session
+            if (apiKey && apiKey.trim().startsWith('AQ.')) {
+                return await callGeminiDirect(selectedModel, apiKey.trim(), prompt);
+            }
+            // Key AIzaSy... atau kosong → lewat GAS (lebih aman, key tidak terekspos)
+            const sysPref = localStorage.getItem(SYSTEM_KEY_PREF) || 'sahabat';
             const res = await callGASBackend('generate_gemini', {
                 model: selectedModel,
                 customApiKey: apiKey,
-                userLevel: currentUser?.level || 'Guest', // ← kirim level agar backend pilih key yang tepat
+                userLevel: currentUser?.level || 'Guest',
+                systemKeyPref: sysPref, // preferensi key sistem dari settings
                 prompt: prompt
             });
             if (res.status === 'success') {
