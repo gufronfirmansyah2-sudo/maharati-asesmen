@@ -152,7 +152,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v3.0 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v2.5 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -413,10 +413,10 @@
                             <option value="gemini-2.5-pro">Google Gemini 2.5 Pro (Penalaran Tinggi, Butuh Kuota)</option>
                         </select>
                     </div>
-                    <!-- Pilihan Key Sistem untuk Sahabat Maharati -->
+                    <!-- Pilihan Jalur API (Sahabat Maharati) -->
                     <div id="sahabat-key-section" class="hidden mb-5">
                         <label class="block text-sm font-bold text-slate-700 mb-2">☕ Pilih Jalur API (Sahabat Maharati)</label>
-                        <div class="space-y-2" id="system-key-options">
+                        <div class="space-y-2">
                             <label class="flex items-center gap-3 p-3 border-2 border-amber-300 bg-amber-50 rounded-xl cursor-pointer hover:bg-amber-100 transition-all">
                                 <input type="radio" name="system-key" value="sahabat" class="accent-amber-500" checked onchange="onSystemKeyChange(this.value)">
                                 <div class="flex-1">
@@ -438,28 +438,38 @@
                                     <p class="text-xs text-slate-500 font-mono">AIzaSyC-k1...lAo</p>
                                 </div>
                             </label>
-                            <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
-                                <input type="radio" name="system-key" value="custom" class="accent-indigo-500" onchange="onSystemKeyChange(this.value)">
-                                <div class="flex-1">
-                                    <p class="text-sm font-bold text-slate-700">🔑 Gunakan Key Pribadi</p>
-                                    <p class="text-xs text-slate-500">Masukkan key Anda sendiri di bawah</p>
-                                </div>
-                            </label>
                         </div>
                     </div>
 
-                    <div class="mb-6" id="custom-key-section">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Kunci API Pribadi <span id="custom-key-label-extra" class="text-slate-400 font-normal text-xs">(Opsional — kosongkan untuk pakai kunci bawaan)</span></label>
-                        <input type="password" id="api-key-input" placeholder="AIzaSy... atau AQ.Ab8... (kedua format didukung)" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono">
-                        <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-                            <p class="text-xs text-slate-400">✅ <code class="bg-slate-100 px-1 rounded">AIzaSy...</code> — via GAS server (lebih stabil)</p>
-                            <p class="text-xs text-amber-500">⚡ <code class="bg-amber-50 px-1 rounded">AQ.Ab8...</code> — via browser langsung (expired ~1 jam)</p>
-                        </div>
-                        <div class="mt-2 flex items-center justify-between">
-                            <span class="text-xs text-slate-400"></span>
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-blue-600 font-semibold hover:underline flex items-center gap-1">
-                                Buat key gratis di Google AI Studio →
-                            </a>
+                    <!-- Key AIzaSy... (via GAS server) -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">
+                            🔑 API Key Pribadi
+                            <span class="text-slate-400 font-normal text-xs ml-1">(format AIzaSy... — opsional)</span>
+                        </label>
+                        <input type="password" id="api-key-input"
+                            placeholder="AIzaSy..."
+                            class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm">
+                        <p class="text-xs text-slate-400 mt-1">Dipanggil via server GAS, lebih stabil. Kosongkan untuk pakai kunci bawaan sistem.
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-500 hover:underline ml-1">Buat gratis →</a>
+                        </p>
+                    </div>
+
+                    <!-- AQ. Token (via browser langsung) — SELALU TERLIHAT -->
+                    <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <label class="block text-sm font-bold text-amber-900 mb-1.5">
+                            ⚡ AQ. Token
+                            <span class="bg-amber-200 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full ml-1">Via Browser Langsung</span>
+                        </label>
+                        <input type="password" id="aq-token-input"
+                            placeholder="AQ.Ab8xyzEf..."
+                            class="w-full p-3 border border-amber-300 bg-white rounded-lg focus:ring-2 focus:ring-amber-400 outline-none font-mono text-sm">
+                        <div class="mt-2 flex items-start gap-2 text-xs text-amber-700">
+                            <span class="text-base leading-none mt-0.5">⚠️</span>
+                            <span>Token AQ. dipanggil <strong>langsung dari browser</strong> tanpa melalui server GAS.
+                            Dapatkan dari <a href="https://aistudio.google.com" target="_blank" class="underline font-semibold">Google AI Studio</a>
+                            → klik profil → <em>Get API Key</em> → pilih format token.
+                            Token ini <strong>expired ~1 jam</strong>, perlu diperbarui secara berkala.</span>
                         </div>
                     </div>
                     <button onclick="saveApiKey()" class="w-full bg-slate-900 text-white py-3 rounded-lg font-bold hover:bg-slate-800 transition-all">Simpan Konfigurasi</button>
@@ -818,15 +828,11 @@
 
         function onSystemKeyChange(val) {
             localStorage.setItem(SYSTEM_KEY_PREF, val);
-            const customSection = document.getElementById('custom-key-section');
-            const labelExtra = document.getElementById('custom-key-label-extra');
-            if (val === 'custom') {
-                customSection && customSection.classList.remove('hidden');
-                if (labelExtra) labelExtra.innerText = '(Wajib diisi)';
-            } else {
+            // Hanya hapus AIzaSy key, TIDAK hapus AQ. token
+            // AQ. token selalu terpisah dan independen
+            if (val !== 'custom') {
                 document.getElementById('api-key-input').value = '';
                 localStorage.removeItem('gemini_api_key');
-                customSection && customSection.classList.add('hidden');
             }
         }
 
@@ -868,7 +874,15 @@
             }
         }
         function checkApiKey() {
-            const key = localStorage.getItem('gemini_api_key');
+            // Restore nilai input dari localStorage saat halaman settings dibuka
+            const savedAiza = localStorage.getItem('gemini_api_key') || '';
+            const savedAQ   = localStorage.getItem('aq_token') || '';
+            const inputAiza = document.getElementById('api-key-input');
+            const inputAQ   = document.getElementById('aq-token-input');
+            if (inputAiza && !inputAiza.value) inputAiza.value = savedAiza;
+            if (inputAQ && !inputAQ.value)     inputAQ.value   = savedAQ;
+
+            const key = savedAiza || savedAQ;
             const statusText = document.getElementById('api-key-status-text');
             const statusBox = document.getElementById('api-key-status-box');
             const resetBtn = document.getElementById('btn-reset-api-key');
@@ -894,20 +908,39 @@
         }
 
         function saveApiKey() {
-            const key = document.getElementById('api-key-input').value.trim();
-            if(!key) {
-                localStorage.removeItem('gemini_api_key');
-                showToast('Kembali menggunakan Kunci API Default Maharati!', 'info');
+            const aizsaKey = document.getElementById('api-key-input').value.trim();
+            const aqKey    = document.getElementById('aq-token-input').value.trim();
+
+            // Simpan AIzaSy key
+            if (aizsaKey) {
+                localStorage.setItem('gemini_api_key', aizsaKey);
             } else {
-                localStorage.setItem('gemini_api_key', key);
-                showToast('Kunci API Pribadi berhasil disimpan!', 'success');
+                localStorage.removeItem('gemini_api_key');
             }
+
+            // Simpan AQ. token terpisah
+            if (aqKey) {
+                if (!aqKey.startsWith('AQ.')) {
+                    showToast('Format token AQ. harus diawali "AQ." — periksa kembali.', 'error');
+                    return;
+                }
+                localStorage.setItem('aq_token', aqKey);
+                showToast('AQ. Token & konfigurasi API berhasil disimpan!', 'success');
+            } else {
+                localStorage.removeItem('aq_token');
+                if (aizsaKey) showToast('API Key disimpan!', 'success');
+                else showToast('Kembali menggunakan kunci bawaan sistem.', 'info');
+            }
+
             checkApiKey();
             setTimeout(() => switchView('form'), 800);
         }
 
         function resetToDefaultApiKey() {
             localStorage.removeItem('gemini_api_key');
+            localStorage.removeItem('aq_token');
+            const aqInput = document.getElementById('aq-token-input');
+            if (aqInput) aqInput.value = '';
             showToast('Kunci API berhasil di-reset ke Default!', 'success');
             checkApiKey();
         }
@@ -1075,7 +1108,8 @@
                 showToast('Harap lengkapi Isian Mata Pelajaran, CP, dan Minimal 1 Bab!', 'error');
                 return;
             }
-            const apiKey = localStorage.getItem('gemini_api_key') || "";
+            // AQ. token punya prioritas (direct browser), lalu AIzaSy key, lalu kosong (pakai system key)
+            const apiKey = localStorage.getItem('aq_token') || localStorage.getItem('gemini_api_key') || "";
             const selectedModel = document.getElementById('api-provider').value || 'gemini-2.5-flash';
             const prompt1 = buildPrompt1(formData);
             showLoading(true, "Menyusun Kisi-Kisi / Blueprint...", "Langkah 1: AI sedang memetakan CP-TP menjadi kisi-kisi penilaian yang proporsional.");
@@ -1122,7 +1156,7 @@
                 return;
             }
             const formData = getFormData();
-            const apiKey = localStorage.getItem('gemini_api_key') || "";
+            const apiKey = localStorage.getItem('aq_token') || localStorage.getItem('gemini_api_key') || "";
             const selectedModel = document.getElementById('api-provider').value || 'gemini-2.5-flash';
             const prompt2 = buildPrompt2(formData);
             showLoading(true, "Menyusun Soal & Pembahasan...", "Langkah 2: AI sedang merancang lembar soal nyata sesuai acuan blueprint yang baru dibuat.");
