@@ -81,6 +81,11 @@
             <button onclick="switchView('login')" class="nav-btn w-full text-left p-3 rounded-xl flex items-center text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all font-medium" data-target="login" id="nav-auth-btn">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg> <span id="nav-auth-text">Login Member</span>
             </button>
+            <button onclick="switchView('result')" class="nav-btn w-full text-left p-3 rounded-xl flex items-center text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all font-medium hidden" data-target="result" id="nav-result-btn">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span>Hasil Output</span>
+                <span id="nav-result-badge" class="ml-auto hidden w-2 h-2 rounded-full bg-emerald-500"></span>
+            </button>
             <button onclick="switchView('history')" class="nav-btn w-full text-left p-3 rounded-xl flex items-center text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all font-medium hidden" data-target="history" id="nav-history-btn">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Riwayat Asesmen
             </button>
@@ -704,6 +709,12 @@
                 document.getElementById('rtab-blueprint-badge').classList.remove('hidden');
                 // Tampilkan tombol Step 2 di result view
                 document.getElementById('result-step2-btn').classList.remove('hidden');
+                // Tampilkan menu "Hasil Output" di sidebar agar bisa balik kapanpun
+                const navResult = document.getElementById('nav-result-btn');
+                if (navResult) {
+                    navResult.classList.remove('hidden');
+                    document.getElementById('nav-result-badge').classList.remove('hidden');
+                }
                 // Tampilkan banner download untuk guest
                 if (!currentUser) showGuestDownloadBanner('blueprint');
                 const btnStep2 = document.getElementById('btn-wizard-step2');
@@ -827,31 +838,41 @@
             // Konversi markdown ke HTML untuk Word
             marked.use({ breaks: true, gfm: true });
             const docBody = marked.parse(contentText);
-            // Blueprint pakai landscape karena tabelnya lebar, soal pakai portrait
             const isBlueprint = currentResultTab === 'blueprint';
-            const pageStyle = isBlueprint
-                ? '@page { size: A4 landscape; margin: 1.5cm; }'
-                : '@page { size: A4 portrait; margin: 2cm; }';
+            // Word pakai mso-page-orientation untuk landscape (bukan @page CSS biasa)
+            const landscapeStyle = isBlueprint ? `
+  @page WordSection1 {
+    size: 841.95pt 595.35pt; /* A4 landscape */
+    margin: 56.7pt 72pt 56.7pt 72pt;
+    mso-page-orientation: landscape;
+  }
+  div.WordSection1 { page: WordSection1; }` : `
+  @page WordSection1 {
+    size: 595.35pt 841.95pt; /* A4 portrait */
+    margin: 72pt 72pt 72pt 72pt;
+    mso-page-orientation: portrait;
+  }
+  div.WordSection1 { page: WordSection1; }`;
             const fullDoc = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
 <head><title>${fileName}</title>
 <meta charset="UTF-8">
+<xml><w:WordDocument><w:View>Print</w:View><w:Zoom>90</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>
 <style>
-  ${pageStyle}
+  ${landscapeStyle}
   body { font-family: Arial, sans-serif; font-size: ${isBlueprint ? '9' : '11'}pt; line-height: 1.5; }
-  /* Tabel — jangan pakai white-space:nowrap di Word, justru perlu wrap */
-  table { border-collapse: collapse; width: 100%; margin: 12px 0; table-layout: fixed; word-wrap: break-word; }
-  th { background: #dce6f1; border: 1px solid #aaa; padding: 5px 7px; font-weight: bold; text-align: left; font-size: ${isBlueprint ? '8' : '10'}pt; vertical-align: top; word-wrap: break-word; }
-  td { border: 1px solid #aaa; padding: 5px 7px; vertical-align: top; font-size: ${isBlueprint ? '8' : '10'}pt; word-wrap: break-word; }
-  tr:nth-child(even) td { background: #f7f9fc; }
-  h1 { font-size: 14pt; color: #1a365d; margin: 16px 0 8px 0; }
-  h2 { font-size: 13pt; color: #1a365d; margin: 14px 0 6px 0; }
-  h3 { font-size: 12pt; color: #2c5282; margin: 12px 0 4px 0; }
-  h4 { font-size: 11pt; color: #2c5282; margin: 10px 0 4px 0; }
-  ul, ol { margin-left: 20px; margin-bottom: 8px; }
-  li { margin-bottom: 3px; }
-  p { margin-bottom: 6px; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; table-layout: fixed; word-wrap: break-word; }
+  th { background: #dce6f1; border: 1px solid #999; padding: 5px 6px; font-weight: bold; text-align: left; font-size: ${isBlueprint ? '8' : '10'}pt; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
+  td { border: 1px solid #bbb; padding: 5px 6px; vertical-align: top; font-size: ${isBlueprint ? '8' : '10'}pt; word-wrap: break-word; overflow-wrap: break-word; }
+  tr:nth-child(even) td { background: #f5f8fc; }
+  h1 { font-size: 14pt; color: #1a365d; margin: 14px 0 6px 0; }
+  h2 { font-size: 13pt; color: #1a365d; margin: 12px 0 5px 0; }
+  h3 { font-size: 12pt; color: #2c5282; margin: 10px 0 4px 0; }
+  h4 { font-size: 11pt; color: #2c5282; margin: 8px 0 3px 0; }
+  ul, ol { margin-left: 18px; margin-bottom: 6px; }
+  li { margin-bottom: 2px; }
+  p { margin-bottom: 5px; }
   strong { font-weight: bold; }
-</style></head><body>${docBody}</body></html>`;
+</style></head><body><div class="WordSection1">${docBody}</div></body></html>`;
             const blob = new Blob(['\ufeff' + fullDoc], { type: 'application/msword' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
