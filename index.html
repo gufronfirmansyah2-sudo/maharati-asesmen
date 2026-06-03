@@ -152,7 +152,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v2.3 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v3.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -450,7 +450,7 @@
                                 <input type="radio" name="api-choice" value="aizaSyCustom" class="accent-blue-600 w-4 h-4" onchange="onApiChoiceChange(this.value)">
                                 <div class="flex-1">
                                     <p class="text-sm font-bold text-slate-700">🔑 Key Pribadi <span class="text-xs font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 ml-1">AIzaSy...</span></p>
-                                    <p class="text-xs text-slate-400 mt-0.5">Via server GAS — stabil, tidak expired</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Via browser langsung — Cepat & tanpa limitasi waktu server</p>
                                 </div>
                             </label>
 
@@ -459,7 +459,7 @@
                                 <input type="radio" name="api-choice" value="aqToken" class="accent-amber-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
                                 <div class="flex-1">
                                     <p class="text-sm font-bold text-amber-900">⚡ AQ. Token <span class="text-[10px] font-mono bg-amber-100 px-1.5 py-0.5 rounded text-amber-700 ml-1">AQ.Ab8...</span></p>
-                                    <p class="text-xs text-amber-600 mt-0.5">Via browser langsung — expired ~1 jam, perlu diperbarui berkala</p>
+                                    <p class="text-xs text-amber-600 mt-0.5">Via browser langsung — Cepat, namun token dapat expired</p>
                                 </div>
                             </label>
                         </div>
@@ -918,7 +918,7 @@
                 txt.innerHTML = '⚡ <strong>AQ. Token aktif</strong> — dipanggil langsung dari browser';
             } else if (aizaKey) {
                 el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-emerald-50 border-emerald-200 text-emerald-700";
-                txt.innerHTML = '🔑 <strong>Key Pribadi (AIzaSy...)</strong> aktif — via server GAS';
+                txt.innerHTML = '🔑 <strong>Key Pribadi (AIzaSy...)</strong> aktif — via browser langsung';
             } else if (isSahabat) {
                 el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-amber-50 border-amber-200 text-amber-800";
                 txt.innerHTML = '☕ <strong>Sahabat Maharati</strong> — jalur aktif: <strong>' + activeLabel + '</strong>';
@@ -1072,20 +1072,20 @@
             return marked.parse(cleanAIResponse(text));
         }
 
-        // Panggil Gemini langsung dari browser (untuk AQ. token yang butuh browser context)
+        // Panggil Gemini langsung dari browser
         async function callGeminiDirect(model, apiKey, prompt) {
             const models = [model, 'gemini-2.5-flash', 'gemini-2.0-flash'];
             const versions = ['v1beta', 'v1'];
             let lastErr = '';
             for (const m of models) {
                 for (const v of versions) {
-                    const url = `https://generativelanguage.googleapis.com/${v}/models/${m}:generateContent`;
+                    // [FIX] Mengubah header 'Bearer' menjadi URL parameter '?key=' sesuai referensi aplikasi lain
+                    const url = `https://generativelanguage.googleapis.com/${v}/models/${m}:generateContent?key=${apiKey}`;
                     try {
                         const resp = await fetch(url, {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${apiKey}`
+                                'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                         });
@@ -1094,7 +1094,7 @@
                             return data.candidates[0].content.parts[0].text;
                         }
                         if (resp.status === 401 || resp.status === 403) {
-                            throw new Error('Token AQ. tidak valid atau sudah expired. Buat token baru dari Google AI Studio dan masukkan kembali di Pengaturan.');
+                            throw new Error('Kunci API / Token AQ tidak valid atau sudah expired. Silakan perbarui di Pengaturan.');
                         }
                         lastErr = data.error?.message || `HTTP ${resp.status}`;
                     } catch(e) {
@@ -1103,22 +1103,22 @@
                     }
                 }
             }
-            throw new Error('Semua model gagal (direct): ' + lastErr);
+            throw new Error('Semua model gagal memproses: ' + lastErr);
         }
 
         async function callGeminiAPI(selectedModel, apiKey, prompt) {
-            // AQ. token HARUS dipanggil dari browser langsung
-            // tidak bisa lewat GAS server karena butuh Google browser session
-            if (apiKey && apiKey.trim().startsWith('AQ.')) {
+            // [FIX] Semua custom API key dipanggil langsung dari browser untuk mencegah timeout server
+            if (apiKey && apiKey.trim() !== '') {
                 return await callGeminiDirect(selectedModel, apiKey.trim(), prompt);
             }
-            // Key AIzaSy... atau kosong → lewat GAS (lebih aman, key tidak terekspos)
+            
+            // Key kosong → lewat GAS (menggunakan default system key, aman disembunyikan)
             const sysPref = localStorage.getItem(SYSTEM_KEY_PREF) || 'sahabat';
             const res = await callGASBackend('generate_gemini', {
                 model: selectedModel,
-                customApiKey: apiKey,
+                customApiKey: '', 
                 userLevel: currentUser?.level || 'Guest',
-                systemKeyPref: sysPref, // preferensi key sistem dari settings
+                systemKeyPref: sysPref,
                 prompt: prompt
             });
             if (res.status === 'success') {
