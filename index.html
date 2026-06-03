@@ -41,8 +41,9 @@
         .rendered-html code { background: #f1f5f9; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-size: 0.8rem; color: #7c3aed; font-family: monospace; }
         .rendered-html hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.5rem 0; }
         /* Wrapper tabel agar bisa scroll horizontal di layar kecil */
-        .rendered-html table { display: block; overflow-x: auto; white-space: nowrap; }
-        .rendered-html table thead, .rendered-html table tbody, .rendered-html table tr { display: table; width: 100%; table-layout: fixed; }
+        .rendered-html .table-wrapper { width: 100%; overflow-x: auto; margin: 1.5rem 0; border-radius: 0.5rem; border: 1px solid #e2e8f0; }
+        .rendered-html table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin: 0; }
+        .rendered-html th { white-space: nowrap; }
     </style>
 </head>
 <body class="h-screen overflow-hidden text-slate-800 flex">
@@ -152,7 +153,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v3.3 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v4.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -1065,15 +1066,19 @@
                 }
             }
             return lines.slice(startIdx).join('\n').trimStart();
-        }
+    }
 
-        function formatMarkdown(text) {
-            marked.use({ breaks: true, gfm: true });
-            return marked.parse(cleanAIResponse(text));
-        }
+    function formatMarkdown(text) {
+        marked.use({ breaks: true, gfm: true });
+        let html = marked.parse(cleanAIResponse(text));
+        // Bungkus setiap <table> dengan div.table-wrapper agar bisa scroll horizontal
+        html = html.replace(/<table>/g, '<div class="table-wrapper"><table>');
+        html = html.replace(/<\/table>/g, '</table></div>');
+        return html;
+    }
 
-        // Panggil Gemini langsung dari browser
-        async function callGeminiDirect(model, apiKey, prompt) {
+    // Panggil Gemini langsung dari browser
+    async function callGeminiDirect(model, apiKey, prompt) {
             const models = [model, 'gemini-2.5-flash', 'gemini-2.0-flash'];
             const versions = ['v1beta', 'v1'];
             let lastErr = '';
