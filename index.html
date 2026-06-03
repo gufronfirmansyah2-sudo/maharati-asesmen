@@ -168,7 +168,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v5.3 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v10.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -1549,6 +1549,7 @@
                 showToast(greeting, 'success');
                 switchView('home');
                 fetchHistoryData();
+                autoFillFormFromUser(); // Pre-fill form dengan data akun
             } else { showToast(res.message, 'error'); }
         }
 
@@ -1757,6 +1758,7 @@
             const titles = { 'home': 'Beranda', 'form': 'Generator Asesmen', 'settings': 'Pengaturan & API Key', 'login': 'Otentikasi Akun', 'result': 'Hasil Output', 'history': 'Riwayat Asesmen', 'admin': '🛡️ Panel Admin' };
             document.getElementById('header-title').innerText = titles[viewId] || 'Asesmen Maharati';
             if (viewId === 'settings') updateApiLevelInfo();
+            if (viewId === 'form') autoFillFormFromUser();
             if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
                 toggleSidebar();
             }
@@ -1894,30 +1896,54 @@
 
         function onTemplateFaseChange() {
             const mapel = document.getElementById('tmpl-mapel').value;
-            const fase = document.getElementById('tmpl-fase').value;
+            const fase  = document.getElementById('tmpl-fase').value;
             if (!mapel || !fase || !window.templateData) return;
             const { templates, babs } = window.templateData;
-            // Isi CP
-            const tpl = templates.find(t => t.mapel === mapel && t.fase === fase);
+
+            // Isi CP — trim & case-insensitive
+            const tpl = templates.find(t =>
+                t.mapel.trim().toLowerCase() === mapel.trim().toLowerCase() &&
+                t.fase.trim().toLowerCase()  === fase.trim().toLowerCase()
+            );
             if (tpl) {
                 document.getElementById('tmpl-cp-text').value = tpl.cp || '';
                 document.getElementById('tmpl-cp-container').classList.remove('hidden');
             }
-            // Isi daftar Bab
+
+            // Isi daftar Bab — trim & case-insensitive agar tidak gagal karena spasi
             const babList = (babs || [])
-                .filter(b => b.mapel === mapel && b.fase === fase)
+                .filter(b =>
+                    b.mapel.trim().toLowerCase() === mapel.trim().toLowerCase() &&
+                    b.fase.trim().toLowerCase()  === fase.trim().toLowerCase()
+                )
                 .sort((a, b) => Number(a.noBab) - Number(b.noBab));
+
+            const babContainer = document.getElementById('tmpl-bab-container');
+            const babListEl    = document.getElementById('tmpl-bab-list');
+
             if (babList.length > 0) {
-                document.getElementById('tmpl-bab-list').innerHTML = babList.map((b, i) => `
+                babListEl.innerHTML = babList.map((b) => `
                     <label class="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-indigo-50 cursor-pointer transition-all">
-                        <input type="checkbox" class="tmpl-bab-check mt-0.5 w-4 h-4 accent-indigo-600" data-bab-nama="${(b.namaBab||'').replace(/"/g,'&quot;')}" data-bab-tp="${(b.tp||'').replace(/"/g,'&quot;')}" data-bab-lingkup="${(b.lingkup||'').replace(/"/g,'&quot;')}" checked>
+                        <input type="checkbox" class="tmpl-bab-check mt-0.5 w-4 h-4 accent-indigo-600"
+                            data-bab-nama="${(b.namaBab||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"
+                            data-bab-tp="${(b.tp||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"
+                            data-bab-lingkup="${(b.lingkup||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"
+                            checked>
                         <div class="flex-1 min-w-0">
                             <p class="font-semibold text-sm text-slate-800">${b.noBab}. ${b.namaBab}</p>
-                            <p class="text-xs text-slate-500 mt-0.5 truncate">${(b.tp||'').substring(0,80)}${(b.tp||'').length > 80 ? '...' : ''}</p>
+                            <p class="text-xs text-slate-500 mt-0.5 line-clamp-2 whitespace-normal">${(b.tp||'').substring(0,120)}${(b.tp||'').length > 120 ? '...' : ''}</p>
+                            ${b.lingkup ? `<p class="text-xs text-indigo-400 mt-0.5 truncate">📌 ${b.lingkup.substring(0,80)}...</p>` : ''}
                         </div>
                     </label>
                 `).join('');
-                document.getElementById('tmpl-bab-container').classList.remove('hidden');
+                babContainer.classList.remove('hidden');
+            } else {
+                // Tidak ada bab — tampilkan info agar user tahu
+                babListEl.innerHTML = `<p class="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
+                    ⚠️ Tidak ada data bab untuk <strong>${mapel}</strong> Fase <strong>${fase}</strong> di sheet <code>Templates_Bab</code>.<br>
+                    Pastikan kolom Mapel dan Fase di sheet sama persis dengan pilihan di atas.
+                </p>`;
+                babContainer.classList.remove('hidden');
             }
             document.getElementById('tmpl-apply-btn').disabled = false;
         }
@@ -2187,6 +2213,16 @@
                 btnEl.innerText = '✓ Verifikasi';
                 showToast('Gagal verifikasi: ' + res.message, 'error');
             }
+        }
+
+        // Auto-fill nama & sekolah dari data akun yang login
+        function autoFillFormFromUser() {
+            if (!currentUser) return;
+            const namaEl    = document.getElementById('f-nama');
+            const sekolahEl = document.getElementById('f-sekolah');
+            // Hanya isi jika masih kosong (tidak override yang sudah diketik user)
+            if (namaEl    && !namaEl.value.trim())    namaEl.value    = currentUser.nama    || '';
+            if (sekolahEl && !sekolahEl.value.trim()) sekolahEl.value = currentUser.sekolah || '';
         }
 
         function showToast(message, type = 'info') {
