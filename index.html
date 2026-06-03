@@ -152,7 +152,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v2.5 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v2.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -413,63 +413,78 @@
                             <option value="gemini-2.5-pro">Google Gemini 2.5 Pro (Penalaran Tinggi, Butuh Kuota)</option>
                         </select>
                     </div>
-                    <!-- Pilihan Jalur API (Sahabat Maharati) -->
-                    <div id="sahabat-key-section" class="hidden mb-5">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">☕ Pilih Jalur API (Sahabat Maharati)</label>
-                        <div class="space-y-2">
-                            <label class="flex items-center gap-3 p-3 border-2 border-amber-300 bg-amber-50 rounded-xl cursor-pointer hover:bg-amber-100 transition-all">
-                                <input type="radio" name="system-key" value="sahabat" class="accent-amber-500" checked onchange="onSystemKeyChange(this.value)">
+                    <!-- Pilihan Jalur API — Radio Unified (semua opsi) -->
+                    <div class="mb-5">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Pilih Jalur API</label>
+                        <div class="space-y-2" id="api-key-radio-group">
+
+                            <!-- Sahabat Maharati (hanya Sahabat Maharati) -->
+                            <label id="radio-sahabat" class="hidden api-radio-item items-center gap-3 p-3 border-2 border-amber-300 bg-amber-50 rounded-xl cursor-pointer hover:bg-amber-100 transition-all">
+                                <input type="radio" name="api-choice" value="sahabat" class="accent-amber-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
                                 <div class="flex-1">
                                     <p class="text-sm font-bold text-amber-900">⭐ Sahabat Maharati</p>
-                                    <p class="text-xs text-amber-700 font-mono">AIzaSyDjVj...YXw8 <span class="text-amber-500">(Jalur khusus & kuota terpisah)</span></p>
+                                    <p class="text-xs text-amber-600 font-mono mt-0.5">AIzaSyDjVj...YXw8 — jalur khusus & kuota terpisah</p>
                                 </div>
                             </label>
-                            <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
-                                <input type="radio" name="system-key" value="default" class="accent-blue-500" onchange="onSystemKeyChange(this.value)">
+
+                            <!-- Maharati Default (semua user) -->
+                            <label class="api-radio-item flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <input type="radio" name="api-choice" value="default" class="accent-blue-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
                                 <div class="flex-1">
                                     <p class="text-sm font-bold text-slate-700">📡 Maharati Default</p>
-                                    <p class="text-xs text-slate-500 font-mono">AIzaSyCz98...tYA</p>
+                                    <p class="text-xs text-slate-400 font-mono mt-0.5">AIzaSyCz98...tYA</p>
                                 </div>
                             </label>
-                            <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
-                                <input type="radio" name="system-key" value="opsional" class="accent-slate-500" onchange="onSystemKeyChange(this.value)">
+
+                            <!-- Maharati Opsional (hanya Sahabat Maharati) -->
+                            <label id="radio-opsional" class="hidden api-radio-item items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <input type="radio" name="api-choice" value="opsional" class="accent-slate-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
                                 <div class="flex-1">
                                     <p class="text-sm font-bold text-slate-700">🔄 Maharati Opsional</p>
-                                    <p class="text-xs text-slate-500 font-mono">AIzaSyC-k1...lAo</p>
+                                    <p class="text-xs text-slate-400 font-mono mt-0.5">AIzaSyC-k1...lAo</p>
+                                </div>
+                            </label>
+
+                            <!-- Custom AIzaSy (semua user) -->
+                            <label class="api-radio-item flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50 transition-all">
+                                <input type="radio" name="api-choice" value="aizaSyCustom" class="accent-blue-600 w-4 h-4" onchange="onApiChoiceChange(this.value)">
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-slate-700">🔑 Key Pribadi <span class="text-xs font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 ml-1">AIzaSy...</span></p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Via server GAS — stabil, tidak expired</p>
+                                </div>
+                            </label>
+
+                            <!-- Custom AQ. Token (semua user) -->
+                            <label class="api-radio-item flex items-center gap-3 p-3 border border-amber-200 bg-amber-50/50 rounded-xl cursor-pointer hover:bg-amber-50 transition-all">
+                                <input type="radio" name="api-choice" value="aqToken" class="accent-amber-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-amber-900">⚡ AQ. Token <span class="text-[10px] font-mono bg-amber-100 px-1.5 py-0.5 rounded text-amber-700 ml-1">AQ.Ab8...</span></p>
+                                    <p class="text-xs text-amber-600 mt-0.5">Via browser langsung — expired ~1 jam, perlu diperbarui berkala</p>
                                 </div>
                             </label>
                         </div>
                     </div>
 
-                    <!-- Key AIzaSy... (via GAS server) -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold text-slate-700 mb-1.5">
-                            🔑 API Key Pribadi
-                            <span class="text-slate-400 font-normal text-xs ml-1">(format AIzaSy... — opsional)</span>
-                        </label>
+                    <!-- Input AIzaSy (muncul saat pilih "Key Pribadi") -->
+                    <div id="input-aizasy" class="hidden mb-4 animate-fade-in">
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">Masukkan API Key (AIzaSy...)</label>
                         <input type="password" id="api-key-input"
                             placeholder="AIzaSy..."
-                            class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm">
-                        <p class="text-xs text-slate-400 mt-1">Dipanggil via server GAS, lebih stabil. Kosongkan untuk pakai kunci bawaan sistem.
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-500 hover:underline ml-1">Buat gratis →</a>
+                            class="w-full p-3 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none font-mono text-sm bg-blue-50 focus:bg-white transition-all">
+                        <p class="text-xs text-slate-400 mt-1.5">
+                            Dapatkan gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-500 hover:underline font-semibold">Google AI Studio →</a>
                         </p>
                     </div>
 
-                    <!-- AQ. Token (via browser langsung) — SELALU TERLIHAT -->
-                    <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
-                        <label class="block text-sm font-bold text-amber-900 mb-1.5">
-                            ⚡ AQ. Token
-                            <span class="bg-amber-200 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full ml-1">Via Browser Langsung</span>
-                        </label>
+                    <!-- Input AQ. Token (muncul saat pilih "AQ. Token") -->
+                    <div id="input-aq" class="hidden mb-4 animate-fade-in">
+                        <label class="block text-xs font-bold text-amber-800 mb-1.5">Masukkan AQ. Token</label>
                         <input type="password" id="aq-token-input"
                             placeholder="AQ.Ab8xyzEf..."
-                            class="w-full p-3 border border-amber-300 bg-white rounded-lg focus:ring-2 focus:ring-amber-400 outline-none font-mono text-sm">
-                        <div class="mt-2 flex items-start gap-2 text-xs text-amber-700">
-                            <span class="text-base leading-none mt-0.5">⚠️</span>
-                            <span>Token AQ. dipanggil <strong>langsung dari browser</strong> tanpa melalui server GAS.
-                            Dapatkan dari <a href="https://aistudio.google.com" target="_blank" class="underline font-semibold">Google AI Studio</a>
-                            → klik profil → <em>Get API Key</em> → pilih format token.
-                            Token ini <strong>expired ~1 jam</strong>, perlu diperbarui secara berkala.</span>
+                            class="w-full p-3 border-2 border-amber-300 rounded-xl focus:ring-2 focus:ring-amber-400 outline-none font-mono text-sm bg-amber-50 focus:bg-white transition-all">
+                        <div class="mt-2 p-3 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-700 leading-relaxed">
+                            Cara mendapatkan: buka <a href="https://aistudio.google.com" target="_blank" class="underline font-semibold">Google AI Studio</a>
+                            → klik ikon profil kanan atas → <em>Get API Key</em> → salin token yang diawali <code class="bg-amber-100 px-1 rounded">AQ.</code>
                         </div>
                     </div>
                     <button onclick="saveApiKey()" class="w-full bg-slate-900 text-white py-3 rounded-lg font-bold hover:bg-slate-800 transition-all">Simpan Konfigurasi</button>
@@ -826,15 +841,41 @@
         // Mapping nama pilihan → preferensi tersimpan
         const SYSTEM_KEY_PREF = 'maharati_system_key_pref';
 
-        function onSystemKeyChange(val) {
+        // Saat radio dipilih — tampilkan input yang relevan
+        function onApiChoiceChange(val) {
             localStorage.setItem(SYSTEM_KEY_PREF, val);
-            // Hanya hapus AIzaSy key, TIDAK hapus AQ. token
-            // AQ. token selalu terpisah dan independen
-            if (val !== 'custom') {
-                document.getElementById('api-key-input').value = '';
+
+            const inputAizaSy = document.getElementById('input-aizasy');
+            const inputAQ     = document.getElementById('input-aq');
+
+            // Sembunyikan semua input dulu
+            inputAizaSy && inputAizaSy.classList.add('hidden');
+            inputAQ     && inputAQ.classList.add('hidden');
+
+            if (val === 'aizaSyCustom') {
+                inputAizaSy && inputAizaSy.classList.remove('hidden');
+                // Restore nilai tersimpan
+                const saved = localStorage.getItem('gemini_api_key') || '';
+                const el = document.getElementById('api-key-input');
+                if (el && !el.value) el.value = saved;
+            } else if (val === 'aqToken') {
+                inputAQ && inputAQ.classList.remove('hidden');
+                const saved = localStorage.getItem('aq_token') || '';
+                const el = document.getElementById('aq-token-input');
+                if (el && !el.value) el.value = saved;
+            } else {
+                // Pilih system key → hapus custom keys
                 localStorage.removeItem('gemini_api_key');
+                localStorage.removeItem('aq_token');
+                const elA = document.getElementById('api-key-input');
+                const elQ = document.getElementById('aq-token-input');
+                if (elA) elA.value = '';
+                if (elQ) elQ.value = '';
             }
         }
+
+        // Alias lama agar tidak error jika masih dipanggil di tempat lain
+        function onSystemKeyChange(val) { onApiChoiceChange(val); }
 
         function updateApiLevelInfo() {
             const el = document.getElementById('api-level-info');
@@ -847,42 +888,49 @@
             const customKey = localStorage.getItem('gemini_api_key');
             const sysPref = localStorage.getItem(SYSTEM_KEY_PREF) || 'sahabat';
 
-            if (sahabatSection) {
-                isSahabat ? sahabatSection.classList.remove('hidden') : sahabatSection.classList.add('hidden');
-            }
-            if (isSahabat) {
-                const radio = document.querySelector(`input[name="system-key"][value="${sysPref}"]`);
-                if (radio) radio.checked = true;
-                if (sysPref !== 'custom') {
-                    customSection && customSection.classList.add('hidden');
-                } else {
-                    customSection && customSection.classList.remove('hidden');
-                }
+            // Tampilkan/sembunyikan opsi khusus Sahabat Maharati
+            const radioSahabat  = document.getElementById('radio-sahabat');
+            const radioOpsional = document.getElementById('radio-opsional');
+            if (radioSahabat)  isSahabat ? radioSahabat.classList.replace('hidden','flex')  : radioSahabat.classList.add('hidden');
+            if (radioOpsional) isSahabat ? radioOpsional.classList.replace('hidden','flex') : radioOpsional.classList.add('hidden');
+
+            // Restore pilihan radio dari localStorage
+            const activeChoice = sysPref || (isSahabat ? 'sahabat' : 'default');
+            const radioEl = document.querySelector(`input[name="api-choice"][value="${activeChoice}"]`);
+            if (radioEl) {
+                radioEl.checked = true;
+                onApiChoiceChange(activeChoice);
             }
 
-            if (customKey) {
+            const aqToken   = localStorage.getItem('aq_token');
+            const aizaKey  = localStorage.getItem('gemini_api_key');
+            const choiceLabels = {
+                sahabat      : '⭐ Sahabat Maharati',
+                default      : '📡 Maharati Default',
+                opsional     : '🔄 Maharati Opsional',
+                aizaSyCustom : '🔑 Key Pribadi (AIzaSy...)',
+                aqToken      : '⚡ AQ. Token (via browser)'
+            };
+            const activeLabel = choiceLabels[sysPref] || (isSahabat ? '⭐ Sahabat Maharati' : '📡 Maharati Default');
+
+            if (aqToken) {
+                el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-amber-50 border-amber-300 text-amber-800";
+                txt.innerHTML = '⚡ <strong>AQ. Token aktif</strong> — dipanggil langsung dari browser';
+            } else if (aizaKey) {
                 el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-emerald-50 border-emerald-200 text-emerald-700";
-                const aqBadge = customKey.startsWith('AQ.') ? ' <span class="bg-amber-100 text-amber-700 px-1.5 rounded font-bold">AQ. via browser</span>' : '';
-                txt.innerHTML = '✅ Menggunakan Kunci API Pribadi' + aqBadge;
+                txt.innerHTML = '🔑 <strong>Key Pribadi (AIzaSy...)</strong> aktif — via server GAS';
             } else if (isSahabat) {
-                const labels = {sahabat:'⭐ Sahabat Maharati', default:'📡 Maharati Default', opsional:'🔄 Maharati Opsional', custom:'🔑 Key Pribadi'};
                 el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-amber-50 border-amber-200 text-amber-800";
-                txt.innerHTML = '☕ <strong>Sahabat Maharati</strong> — jalur aktif: <strong>' + (labels[sysPref] || '⭐ Sahabat Maharati') + '</strong>';
+                txt.innerHTML = '☕ <strong>Sahabat Maharati</strong> — jalur aktif: <strong>' + activeLabel + '</strong>';
             } else {
                 el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-slate-50 border-slate-200 text-slate-600";
-                txt.innerHTML = "👤 <strong>Mode Tamu</strong> — menggunakan kunci <strong>Maharati Default</strong>.";
+                txt.innerHTML = '👤 <strong>Mode Tamu</strong> — jalur aktif: <strong>' + activeLabel + '</strong>';
             }
         }
         function checkApiKey() {
-            // Restore nilai input dari localStorage saat halaman settings dibuka
             const savedAiza = localStorage.getItem('gemini_api_key') || '';
             const savedAQ   = localStorage.getItem('aq_token') || '';
-            const inputAiza = document.getElementById('api-key-input');
-            const inputAQ   = document.getElementById('aq-token-input');
-            if (inputAiza && !inputAiza.value) inputAiza.value = savedAiza;
-            if (inputAQ && !inputAQ.value)     inputAQ.value   = savedAQ;
-
-            const key = savedAiza || savedAQ;
+            const key = savedAQ || savedAiza;
             const statusText = document.getElementById('api-key-status-text');
             const statusBox = document.getElementById('api-key-status-box');
             const resetBtn = document.getElementById('btn-reset-api-key');
@@ -982,15 +1030,15 @@
 
         function buildPrompt1(d) {
             const isNonTest = ['Praktik', 'Produk', 'Projek', 'Portofolio'].includes(d.jenisAsesmen);
-            return `Tahap 1 -Blueprint\nPENTING: Langsung tulis dokumen blueprint tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau kalimat serupa. Output adalah dokumen profesional siap pakai.\n\nAnda adalah ahli asesmen pendidikan dan perancang evaluasi pembelajaran Kurikulum Merdeka dengan pendekatan pembelajaran mendalam.\nTugas Anda adalah menyusun blueprint/kisi-kisi asesmen sumatif yang valid, proporsional, kontekstual, dan benar-benar mengukur ketercapaian Capaian Pembelajaran (CP), diturunkan ke TP, lalu ke indikator.\nJANGAN buat produk asesmennya dulu — hanya blueprint dalam bentuk TEXT/MARKDOWN.\n\n==================================================\nIDENTITAS ASESMEN\n==================================================\n-Mata pelajaran: ${d.mapel}\n-Jenjang : ${d.jenjang}\n-Kelas/Semester: ${d.kelas} (Fase ${d.fase})\n-Bab Materi: ${d.babGabung}\n-Jenis asesmen: ${d.tujuan} (${d.jenisAsesmen})\nKonteks lokal: ${d.lokasi}\nWaktu: ${d.waktu} Menit\n${!isNonTest ? `Jumlah soal: ${d.jumlah} Soal | Komposisi: ${d.komposisi}` : `Ketentuan Asesmen: Berupa Rubrik/Tugas Kinerja terstruktur`}\n\n==================================================\nCAPAIAN PEMBELAJARAN (CP)\n==================================================\n${d.cp}\n\n==================================================\nTUJUAN PEMBELAJARAN (TP)\n==================================================\n${d.tpGabung}\n\n==================================================\nLINGKUP MATERI\n==================================================\n${d.lingkupGabung || 'Sesuai dengan Bab dan TP di atas.'}\n\n==================================================\nKETENTUAN ASESMEN\n==================================================\n${!isNonTest ? `Jumlah soal: ${d.jumlah} (${d.komposisi})\nDistribusi Bloom: ${d.distribusi}\n\nDistribusi DoK:\n- DoK 1 = recall dasar\n- DoK 2 = aplikasi konsep\n- DoK 3 = penalaran strategis\n- DoK 4 = investigasi/refleksi mendalam` : `Sajikan kriteria asesmen yang relevan (misalnya dimensi rubrik: Perencanaan, Pelaksanaan, Hasil Akhir/Produk, dan Presentasi).`}\n\n==================================================\nKONTEKS SOAL / TUGAS\n==================================================\nGunakan konteks yang dekat dengan kehidupan siswa di ${d.lokasi} seperti: Sosial, Budaya, Ekonomi, geografi, kebiasaan lokal.\n\n==================================================\nATURAN KUALITAS\n==================================================\n1. Seluruh asesmen mengukur ketercapaian CP. Hindari hafalan langsung.\n2. Harus menuntut analisis/evaluasi.\n${!isNonTest ? `3. Minimal 25% soal menggunakan stimulus (gambar deskripsi, tabel, grafik, teks).\n4. Minimal 15% Literasi, 15% Numerasi.` : `3. Tugas atau proyek harus aplikatif dan dapat diselesaikan dalam rentang waktu yang wajar.`}\n\n==================================================\nTUGAS\n==================================================\nBuat Blueprint dengan struktur:\nTABEL 1: CP dan TP lengkap.\n${!isNonTest ? `TABEL 2 (Matriks Kisi-kisi):\nNo | Elemen CP | TP | Indikator Soal (sertakan konteks ${d.lokasi}) | Materi | Bloom/DoK | Stimulus\n\nTampilkan rekap:\nTabel Distribusi (Target vs Aktual) untuk LOTS, MOTS, HOTS, Stimulus, Literasi, Numerasi.` : `TABEL 2 (Kisi-kisi Kinerja):\nElemen CP | TP | Indikator Kinerja (sertakan konteks ${d.lokasi}) | Materi | Kriteria Keberhasilan`}\n`;
+            return `Tahap 1 -Blueprint\nPENTING: Langsung tulis dokumen blueprint tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau kalimat serupa. Output adalah dokumen profesional siap pakai.\n\nAnda adalah ahli asesmen pendidikan dan perancang evaluasi pembelajaran Kurikulum Merdeka dengan pendekatan pembelajaran mendalam.\nTugas Anda adalah menyusun blueprint/kisi-kisi asesmen sumatif yang valid, proporsional, kontekstual, dan benar-benar mengukur ketercapaian Capaian Pembelajaran (CP), diturunkan ke TP, lalu ke indikator.\nJANGAN buat produk asesmennya dulu — hanya blueprint dalam bentuk TEXT/MARKDOWN.\n\n==================================================\nIDENTITAS ASESMEN\n==================================================\n-Mata pelajaran: ${d.mapel}\n-Jenjang : ${d.jenjang}\n-Kelas/Semester: ${d.kelas} (Fase ${d.fase})\n-Bab Materi: ${d.babGabung}\n-Jenis asesmen: ${d.tujuan} (${d.jenisAsesmen})\nKonteks lokal: ${d.lokasi}\nWaktu: ${d.waktu} Menit\n${!isNonTest ? `Jumlah soal: ${d.jumlah} Soal | Komposisi: ${d.komposisi}` : `Ketentuan Asesmen: Berupa Rubrik/Tugas Kinerja terstruktur`}\n\n==================================================\nCAPAIAN PEMBELAJARAN (CP)\n==================================================\n${d.cp}\n\n==================================================\nTUJUAN PEMBELAJARAN (TP)\n==================================================\n${d.tpGabung}\n\n==================================================\nLINGKUP MATERI\n==================================================\n${d.lingkupGabung || 'Sesuai dengan Bab dan TP di atas.'}\n\n==================================================\nKETENTUAN ASESMEN\n==================================================\n${!isNonTest ? `Jumlah soal: ${d.jumlah} (${d.komposisi})\nDistribusi Bloom: ${d.distribusi}\n\nDistribusi DoK:\n- DoK 1 = recall dasar\n- DoK 2 = aplikasi konsep\n- DoK 3 = penalaran strategis\n- DoK 4 = investigasi/refleksi mendalam` : `Sajikan kriteria asesmen yang relevan (misalnya dimensi rubrik: Perencanaan, Pelaksanaan, Hasil Akhir/Produk, dan Presentasi).`}\n\n==================================================\nKONTEKS SOAL / TUGAS\n==================================================\nGunakan konteks yang dekat dengan kehidupan siswa di ${d.lokasi} seperti: Sosial, Budaya, Ekonomi, geografi, kebiasaan lokal.\n\n==================================================\nATURAN KUALITAS & FORMATING (SANGAT PENTING)\n==================================================\n1. SELURUH TABEL WAJIB menggunakan format Markdown Table yang valid (menggunakan tanda | sebagai batas kolom dan baris pemisah |---|---|). JANGAN gunakan teks biasa atau garis bawah (__).\n2. Seluruh asesmen mengukur ketercapaian CP. Hindari hafalan langsung.\n3. Harus menuntut analisis/evaluasi.\n${!isNonTest ? `4. Minimal 25% soal menggunakan stimulus (gambar deskripsi, tabel, grafik, teks).\n5. Minimal 15% Literasi, 15% Numerasi.` : `4. Tugas atau proyek harus aplikatif dan dapat diselesaikan dalam rentang waktu yang wajar.`}\n\n==================================================\nTUGAS\n==================================================\nBuat Blueprint dengan struktur:\nTABEL 1: CP dan TP lengkap.\n${!isNonTest ? `TABEL 2 (Matriks Kisi-kisi):\n| No | Elemen CP | TP | Indikator Soal (sertakan konteks ${d.lokasi}) | Materi | Bloom/DoK | Stimulus |\n|---|---|---|---|---|---|---|\n\nTampilkan rekap:\nTabel Distribusi (Target vs Aktual) untuk LOTS, MOTS, HOTS, Stimulus, Literasi, Numerasi.` : `TABEL 2 (Kisi-kisi Kinerja):\n| Elemen CP | TP | Indikator Kinerja (sertakan konteks ${d.lokasi}) | Materi | Kriteria Keberhasilan |\n|---|---|---|---|---|`}\n`;
         }
 
         function buildPrompt2(d) {
             const isNonTest = ['Praktik', 'Produk', 'Projek', 'Portofolio'].includes(d.jenisAsesmen);
             if(isNonTest) {
-                return `Tahap 2 -Produk Asesmen\nPENTING: Langsung tulis dokumen asesmen tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau sejenisnya. Output adalah dokumen profesional siap pakai.\n\nBerdasarkan blueprint asesmen kinerja/projek yang telah kamu buat sebelumnya, buat dokumen asesmen lengkap secara berurutan.\n\n==================================================\nFORMAT OUTPUT\n==================================================\nBAGIAN A — INSTRUMEN TUGAS\n- Header Identitas.\n- Deskripsi Tugas / Skenario Projek.\n- Langkah-langkah pelaksanaan untuk siswa.\n- Ketentuan pengumpulan.\n\nBAGIAN B — RUBRIK PENILAIAN\nSajikan tabel rubrik penilaian dengan kriteria yang jelas (Skala 1-4 atau Kurang-Sangat Baik).\nSertakan panduan konversi nilai akhir.`;
+                return `Tahap 2 -Produk Asesmen\nPENTING: Langsung tulis dokumen asesmen tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau sejenisnya. Output adalah dokumen profesional siap pakai.\n\nBerdasarkan blueprint asesmen kinerja/projek yang telah kamu buat sebelumnya, buat dokumen asesmen lengkap secara berurutan.\n\n==================================================\nFORMAT OUTPUT\n==================================================\nBAGIAN A — INSTRUMEN TUGAS\n- Header Identitas.\n- Deskripsi Tugas / Skenario Projek.\n- Langkah-langkah pelaksanaan untuk siswa.\n- Ketentuan pengumpulan.\n\nBAGIAN B — RUBRIK PENILAIAN\nSajikan tabel rubrik penilaian dengan kriteria yang jelas (Skala 1-4 atau Kurang-Sangat Baik). WAJIB buat tabel dalam format standar Markdown Table (menggunakan pemisah |---|).\nSertakan panduan konversi nilai akhir.`;
             }
-            return `Tahap 2 -Naskah Soal\nPENTING: Langsung tulis naskah soal tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau sejenisnya. Output adalah dokumen profesional siap pakai.\n\nBerdasarkan naskah blueprint/kisi-kisi asesmen yang telah kamu buat sebelumnya, buat paket soal lengkap secara berurutan.\n\n==================================================\nATURAN UMUM\n==================================================\n1. Ikuti blueprint secara konsisten (nomor, level, konteks).\n2. Pilihan ganda A-D (SMP), A-E (SMA/SMK). Panjang opsi homogen.\n3. Distraktor logis dan mencerminkan miskonsepsi.\n\n==================================================\nATURAN STIMULUS\n==================================================\n- Relevan, valid, dan logis.\n- Jika ada gambar, jangan buat gambar tapi gunakan deskripsi [ILUSTRASI: deskripsi].\n\n==================================================\nFORMAT OUTPUT\n==================================================\nBAGIAN A — SOAL ASESMEN\n(Tampilkan TANPA KUNCI)\n- Header Identitas.\n- Petunjuk mengerjakan.\n- Seluruh Soal (berurutan).\n\nBAGIAN B — KUNCI & PEMBAHASAN\n1. Tabel Kunci Cepat\n2. Kunci dan Pembahasan detail tiap soal.\nAturan: LOTS 2 kalimat, MOTS 3 kalimat, HOTS 4 kalimat (tambahkan "Catatan Pedagogis"). Tambahkan "Miskonsepsi Umum" di akhir tiap pembahasan.\n3. Analisis ketercapaian TP & Rekomendasi Tindak Lanjut.`;
+            return `Tahap 2 -Naskah Soal\nPENTING: Langsung tulis naskah soal tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau sejenisnya. Output adalah dokumen profesional siap pakai.\n\nBerdasarkan naskah blueprint/kisi-kisi asesmen yang telah kamu buat sebelumnya, buat paket soal lengkap secara berurutan.\n\n==================================================\nATURAN UMUM\n==================================================\n1. Ikuti blueprint secara konsisten (nomor, level, konteks).\n2. Pilihan ganda A-D (SMP), A-E (SMA/SMK). Panjang opsi homogen.\n3. Distraktor logis dan mencerminkan miskonsepsi.\n4. WAJIB gunakan format Markdown Table untuk setiap pembuatan tabel.\n\n==================================================\nATURAN STIMULUS\n==================================================\n- Relevan, valid, dan logis.\n- Jika ada gambar, jangan buat gambar tapi gunakan deskripsi [ILUSTRASI: deskripsi].\n\n==================================================\nFORMAT OUTPUT\n==================================================\nBAGIAN A — SOAL ASESMEN\n(Tampilkan TANPA KUNCI)\n- Header Identitas.\n- Petunjuk mengerjakan.\n- Seluruh Soal (berurutan).\n\nBAGIAN B — KUNCI & PEMBAHASAN\n1. Tabel Kunci Cepat (Wajib Format Tabel Markdown: |---|---|)\n2. Kunci dan Pembahasan detail tiap soal.\nAturan: LOTS 2 kalimat, MOTS 3 kalimat, HOTS 4 kalimat (tambahkan "Catatan Pedagogis"). Tambahkan "Miskonsepsi Umum" di akhir tiap pembahasan.\n3. Analisis ketercapaian TP & Rekomendasi Tindak Lanjut.`;
         }
 
         // [FIX 3] Ganti formatMarkdown & hapus renderHTMLTable — gunakan marked.js
