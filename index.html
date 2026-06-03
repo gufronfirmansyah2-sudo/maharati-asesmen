@@ -21,6 +21,19 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+        /* Streaming cursor */
+        .streaming-cursor { display: inline-block; width: 2px; height: 1em; background: #3b82f6; margin-left: 2px; vertical-align: text-bottom; animation: blink 0.8s step-end infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .streaming-active { border: 2px solid #bfdbfe !important; background: #f0f9ff !important; }
+
+        /* Edit mode */
+        .edit-mode-active { outline: 2px dashed #3b82f6 !important; background: #f0f9ff !important; padding: 8px !important; border-radius: 8px; min-height: 200px; }
+
+        /* Admin panel */
+        .status-pending { background:#fef9c3; color:#92400e; }
+        .status-verified { background:#dcfce7; color:#166534; }
+        .status-rejected { background:#fee2e2; color:#991b1b; }
+
         /* [FIX 2] Rendered Markdown Styling - Lengkap dengan tabel */
         .rendered-html table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.8rem; }
         .rendered-html th { background: linear-gradient(to right, #f1f5f9, #e2e8f0); padding: 0.75rem 1rem; text-align: left; font-weight: 700; border: 1px solid #e2e8f0; color: #334155; font-size: 0.75rem; }
@@ -96,6 +109,9 @@
             <button onclick="switchView('history')" class="nav-btn w-full text-left p-3 rounded-xl flex items-center text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all font-medium hidden" data-target="history" id="nav-history-btn">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Riwayat Asesmen
             </button>
+            <button onclick="checkAdminAccess()" class="hidden w-full text-left p-3 rounded-xl flex items-center text-purple-600 hover:bg-purple-50 transition-all font-medium" id="nav-admin-btn">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> Panel Admin
+            </button>
             <button onclick="handleLogout()" class="hidden w-full text-left p-3 rounded-xl flex items-center text-rose-600 hover:bg-rose-50 transition-all font-medium" id="nav-logout-btn">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg> Keluar (Logout)
             </button>
@@ -152,7 +168,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v8.3 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v2.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -577,13 +593,19 @@
                             Lanjut Generate Soal & Pembahasan
                         </button>
                     </div>
-                    <div class="flex gap-2 ml-auto">
-                        <button onclick="copyResult()" class="text-xs bg-slate-100 border border-slate-200 px-4 py-2.5 rounded-lg font-bold text-slate-700 hover:bg-slate-200 transition-all flex items-center gap-1.5">
+                    <div class="flex flex-wrap gap-2 ml-auto">
+                        <button onclick="copyResult()" class="text-xs bg-slate-100 border border-slate-200 px-3 py-2.5 rounded-lg font-bold text-slate-700 hover:bg-slate-200 transition-all flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> 
-                            Salin Teks
+                            Salin
                         </button>
-                        <button onclick="downloadAsWordDoc()" class="text-xs bg-blue-600 border border-blue-700 px-4 py-2.5 rounded-lg font-bold text-white hover:bg-blue-700 transition-all flex items-center gap-1.5 shadow-sm">
-                            💾 Download Word (.doc)
+                        <button onclick="toggleEditMode()" id="btn-edit-result" class="text-xs bg-violet-100 border border-violet-200 px-3 py-2.5 rounded-lg font-bold text-violet-700 hover:bg-violet-200 transition-all flex items-center gap-1.5">
+                            ✏️ Edit
+                        </button>
+                        <button onclick="exportToPDF()" class="text-xs bg-rose-100 border border-rose-200 px-3 py-2.5 rounded-lg font-bold text-rose-700 hover:bg-rose-200 transition-all flex items-center gap-1.5">
+                            📄 PDF
+                        </button>
+                        <button onclick="downloadAsWordDoc()" class="text-xs bg-blue-600 border border-blue-700 px-3 py-2.5 rounded-lg font-bold text-white hover:bg-blue-700 transition-all flex items-center gap-1.5 shadow-sm">
+                            💾 Word (.doc)
                         </button>
                     </div>
                 </div>
@@ -740,6 +762,72 @@
                         </div>
                         <p class="text-xs text-center text-slate-500">Sudah donasi? <button onclick="closeDonorGate(); switchView('login'); toggleAuthTab('register');" class="text-blue-600 font-bold hover:underline">Daftar sebagai Sahabat Maharati →</button></p>
                         <button onclick="closeDonorGate()" class="w-full py-2.5 border border-slate-300 text-slate-600 font-bold rounded-xl text-sm hover:bg-slate-50 transition-all">Tutup</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: ADMIN PANEL -->
+            <div id="view-admin" class="hidden max-w-5xl mx-auto space-y-6">
+                <div class="grid md:grid-cols-3 gap-4" id="admin-stats-cards">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <p class="text-3xl font-black text-blue-600" id="stat-total-users">-</p>
+                        <p class="text-sm text-slate-500 font-medium mt-1">Total Sahabat Maharati</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <p class="text-3xl font-black text-amber-600" id="stat-total-donasi">-</p>
+                        <p class="text-sm text-slate-500 font-medium mt-1">Total Donasi Masuk</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <p class="text-3xl font-black text-rose-500" id="stat-pending-donasi">-</p>
+                        <p class="text-sm text-slate-500 font-medium mt-1">Pending Verifikasi</p>
+                    </div>
+                </div>
+
+                <!-- Donasi Pending -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-slate-800">☕ Donasi Masuk — Perlu Verifikasi</h3>
+                        <button onclick="loadAdminData()" class="text-xs bg-blue-100 text-blue-700 px-3 py-2 rounded-lg font-bold hover:bg-blue-200 transition-all">🔄 Refresh</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-bold">
+                                <tr>
+                                    <th class="p-3">Waktu</th>
+                                    <th class="p-3">Nama</th>
+                                    <th class="p-3">Email</th>
+                                    <th class="p-3">Nominal</th>
+                                    <th class="p-3">Kode</th>
+                                    <th class="p-3">Bukti</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-donasi-tbody">
+                                <tr><td colspan="8" class="p-4 text-center text-slate-400">Memuat data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Daftar User -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">🎓 Daftar Sahabat Maharati</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-bold">
+                                <tr>
+                                    <th class="p-3">Nama</th>
+                                    <th class="p-3">Email</th>
+                                    <th class="p-3">Sekolah</th>
+                                    <th class="p-3">Tanggal Daftar</th>
+                                    <th class="p-3">Level</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-tbody">
+                                <tr><td colspan="5" class="p-4 text-center text-slate-400">Memuat data...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1204,12 +1292,21 @@
             switchView('result');
             switchResultTab('blueprint');
             try {
-                const textResult = await callGeminiAPI(selectedModel, apiKey, prompt1);
-                cachedBlueprintResultText = cleanAIResponse(textResult);
-                document.getElementById('res-blueprint').innerHTML = formatMarkdown(cachedBlueprintResultText);
-                // Sembunyikan placeholder kosong
+                let textResult;
                 const placeholder = document.getElementById('res-empty-placeholder');
                 if (placeholder) placeholder.classList.add('hidden');
+                document.getElementById('res-blueprint').classList.remove('hidden');
+
+                if (apiKey) {
+                    // Streaming — teks muncul bertahap
+                    showLoading(false);
+                    textResult = await callGeminiStream(selectedModel, apiKey, prompt1, document.getElementById('res-blueprint'));
+                } else {
+                    // GAS backend — spinner biasa
+                    textResult = await callGeminiAPI(selectedModel, apiKey, prompt1);
+                    document.getElementById('res-blueprint').innerHTML = formatMarkdown(cleanAIResponse(textResult));
+                }
+                cachedBlueprintResultText = cleanAIResponse(textResult);
                 document.getElementById('out-prompt1').value = prompt1;
                 document.getElementById('out-prompt2').value = buildPrompt2(formData);
                 endLoadingProgress();
@@ -1253,9 +1350,17 @@
             switchResultTab('soal');
             try {
                 const fullPrompt = `Gunakan Blueprint/Kisi-kisi yang telah disepakati ini sebagai pedoman tunggal:\n\n${cachedBlueprintResultText}\n\nPerintah:\n${prompt2}`;
-                const textResult = await callGeminiAPI(selectedModel, apiKey, fullPrompt);
+                let textResult;
+                document.getElementById('res-soal').classList.remove('hidden');
+
+                if (apiKey) {
+                    showLoading(false);
+                    textResult = await callGeminiStream(selectedModel, apiKey, fullPrompt, document.getElementById('res-soal'));
+                } else {
+                    textResult = await callGeminiAPI(selectedModel, apiKey, fullPrompt);
+                    document.getElementById('res-soal').innerHTML = formatMarkdown(cleanAIResponse(textResult));
+                }
                 cachedSoalResultText = cleanAIResponse(textResult);
-                document.getElementById('res-soal').innerHTML = formatMarkdown(cachedSoalResultText);
                 endLoadingProgress();
                 setTimeout(() => showLoading(false), 500);
                 showToast('✅ Soal & Pembahasan selesai! Blueprint masih ada di tab "Blueprint / Kisi-Kisi".', 'success');
@@ -1591,6 +1696,12 @@
                 badge.className = "flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-300";
                 badge.innerHTML = `☕ <span id="user-name-display" class="ml-1">${currentUser.nama}</span> <span class="ml-1 text-[9px] bg-amber-300 px-1.5 py-0.5 rounded-full font-extrabold">SAHABAT</span>`;
                 document.getElementById('member-draft-controls').classList.remove('hidden');
+                // Tampilkan tombol admin jika email adalah admin
+                const adminEmails = ['gufronf16@gmail.com', 'gufron@maharati.id'];
+                if (adminEmails.includes(currentUser.email.toLowerCase())) {
+                    const adminBtn = document.getElementById('nav-admin-btn');
+                    if (adminBtn) adminBtn.classList.remove('hidden');
+                }
             }
         }
 
@@ -1634,7 +1745,7 @@
                 const banner = document.getElementById('guest-download-banner');
                 if (banner) banner.classList.add('hidden');
             }
-            const titles = { 'home': 'Beranda', 'form': 'Generator Asesmen', 'settings': 'Pengaturan & API Key', 'login': 'Otentikasi Akun', 'result': 'Hasil Output', 'history': 'Riwayat Asesmen' };
+            const titles = { 'home': 'Beranda', 'form': 'Generator Asesmen', 'settings': 'Pengaturan & API Key', 'login': 'Otentikasi Akun', 'result': 'Hasil Output', 'history': 'Riwayat Asesmen', 'admin': '🛡️ Panel Admin' };
             document.getElementById('header-title').innerText = titles[viewId] || 'Asesmen Maharati';
             if (viewId === 'settings') updateApiLevelInfo();
             if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
@@ -1839,6 +1950,236 @@
 
         function closeDonorGate() {
             document.getElementById('donor-gate-modal').classList.add('hidden');
+        }
+
+        // =============================================
+        // STREAMING GEMINI API
+        // =============================================
+        async function callGeminiStream(model, apiKey, prompt, targetEl) {
+            const models = [model, 'gemini-2.5-flash', 'gemini-2.0-flash'];
+            let lastErr = '';
+
+            for (const m of models) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:streamGenerateContent?key=${apiKey}&alt=sse`;
+                    const resp = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    if (!resp.ok) {
+                        const err = await resp.json();
+                        if (resp.status === 401 || resp.status === 403)
+                            throw new Error('API Key tidak valid atau expired.');
+                        lastErr = err.error?.message || `HTTP ${resp.status}`;
+                        continue;
+                    }
+                    const reader = resp.body.getReader();
+                    const decoder = new TextDecoder();
+                    let fullText = '';
+                    let buf = '';
+                    targetEl.classList.add('streaming-active');
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        buf += decoder.decode(value, { stream: true });
+                        const lines = buf.split('\n');
+                        buf = lines.pop();
+                        for (const line of lines) {
+                            if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                                try {
+                                    const data = JSON.parse(line.slice(6));
+                                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                                    if (text) {
+                                        fullText += text;
+                                        targetEl.innerHTML = formatMarkdown(fullText) + '<span class="streaming-cursor"></span>';
+                                    }
+                                } catch(e) {}
+                            }
+                        }
+                    }
+                    targetEl.classList.remove('streaming-active');
+                    targetEl.innerHTML = formatMarkdown(cleanAIResponse(fullText));
+                    return fullText;
+                } catch(e) {
+                    if (e.message.includes('tidak valid') || e.message.includes('expired')) throw e;
+                    lastErr = e.message;
+                }
+            }
+            throw new Error('Streaming gagal: ' + lastErr);
+        }
+
+        // =============================================
+        // EDIT MODE
+        // =============================================
+        let editMode = false;
+        function toggleEditMode() {
+            const activeDiv = document.getElementById('res-' + currentResultTab);
+            const btn = document.getElementById('btn-edit-result');
+            if (currentResultTab === 'prompt') {
+                showToast('Edit tidak tersedia di tab Prompt Master.', 'error'); return;
+            }
+            editMode = !editMode;
+            if (editMode) {
+                activeDiv.contentEditable = 'true';
+                activeDiv.classList.add('edit-mode-active');
+                activeDiv.focus();
+                btn.innerHTML = '💾 Simpan Edit';
+                btn.className = btn.className.replace('violet', 'emerald').replace('violet', 'emerald');
+                showToast('Mode edit aktif. Klik teks untuk mulai mengedit.', 'info');
+            } else {
+                activeDiv.contentEditable = 'false';
+                activeDiv.classList.remove('edit-mode-active');
+                btn.innerHTML = '✏️ Edit';
+                // Simpan perubahan ke cache
+                const editedText = activeDiv.innerText;
+                if (currentResultTab === 'blueprint') cachedBlueprintResultText = editedText;
+                else if (currentResultTab === 'soal') cachedSoalResultText = editedText;
+                showToast('Perubahan tersimpan! Re-download untuk mendapat versi terbaru.', 'success');
+            }
+        }
+
+        // =============================================
+        // EXPORT PDF (via print)
+        // =============================================
+        function exportToPDF() {
+            const activeTab = currentResultTab;
+            if (activeTab === 'prompt') {
+                showToast('PDF tidak tersedia di tab Prompt Master.', 'error'); return;
+            }
+            const content = activeTab === 'blueprint' ? cachedBlueprintResultText : cachedSoalResultText;
+            if (!content || content.startsWith('Belum ada')) {
+                showToast('Belum ada hasil untuk diekspor.', 'error'); return;
+            }
+            marked.use({ breaks: true, gfm: true });
+            const htmlContent = marked.parse(content);
+            const mapel = document.getElementById('f-mapel').value || 'Asesmen';
+            const kelas = document.getElementById('f-kelas').value || 'X';
+            const printWin = window.open('', '_blank');
+            printWin.document.write(`<!DOCTYPE html><html><head>
+                <meta charset="UTF-8">
+                <title>${mapel} Kelas ${kelas}</title>
+                <style>
+                    @page { margin: 1.5cm; }
+                    body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #1a1a1a; }
+                    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 9.5pt; }
+                    th { background: #dce6f1; border: 1px solid #999; padding: 5px 7px; font-weight: bold; text-align: left; }
+                    td { border: 1px solid #bbb; padding: 5px 7px; vertical-align: top; }
+                    tr:nth-child(even) td { background: #f5f8fc; }
+                    h1,h2 { color: #1a365d; } h3,h4 { color: #2c5282; }
+                    blockquote { border-left: 4px solid #3b82f6; padding: 6px 12px; background: #f0f9ff; margin: 10px 0; }
+                    hr { border: 1px solid #e2e8f0; }
+                    @media print { .no-print { display:none; } }
+                </style>
+            </head><body>
+                <div style="text-align:center;border-bottom:2px solid #1a365d;padding-bottom:10px;margin-bottom:20px">
+                    <strong style="font-size:13pt">${mapel.toUpperCase()} — KELAS ${kelas}</strong><br>
+                    <span style="font-size:10pt;color:#555">${activeTab === 'blueprint' ? 'Blueprint / Kisi-Kisi Asesmen' : 'Naskah Soal & Pembahasan'}</span>
+                </div>
+                ${htmlContent}
+                <script>window.onload=()=>{window.print();}<\/script>
+            </body></html>`);
+            printWin.document.close();
+            showToast('Jendela cetak dibuka. Pilih "Save as PDF" di dialog print.', 'success');
+        }
+
+        // =============================================
+        // ADMIN PANEL
+        // =============================================
+        const ADMIN_PASS_KEY = 'maharati_admin_verified';
+
+        function checkAdminAccess() {
+            if (sessionStorage.getItem(ADMIN_PASS_KEY) === 'yes') {
+                switchView('admin'); loadAdminData(); return;
+            }
+            const pass = prompt('Masukkan password Admin:');
+            if (!pass) return;
+            // Hash sederhana — cocokkan dengan hash di GAS
+            callGASBackend('admin_login', { pass }).then(res => {
+                if (res.status === 'success') {
+                    sessionStorage.setItem(ADMIN_PASS_KEY, 'yes');
+                    switchView('admin');
+                    loadAdminData();
+                } else {
+                    showToast('Password admin salah.', 'error');
+                }
+            });
+        }
+
+        async function loadAdminData() {
+            if (sessionStorage.getItem(ADMIN_PASS_KEY) !== 'yes') return;
+            showToast('Memuat data admin...', 'info');
+
+            const res = await callGASBackend('admin_get_data', {});
+            if (res.status !== 'success') {
+                showToast('Gagal memuat data: ' + res.message, 'error'); return;
+            }
+
+            // Stats
+            document.getElementById('stat-total-users').innerText = res.users?.length || 0;
+            document.getElementById('stat-total-donasi').innerText = res.donations?.length || 0;
+            const pending = (res.donations || []).filter(d => {
+                const s = (d.status || '').toLowerCase();
+                return s === 'pending' || s === '';
+            }).length;
+            document.getElementById('stat-pending-donasi').innerText = pending;
+
+            // Tabel donasi
+            const donasiTbody = document.getElementById('admin-donasi-tbody');
+            if (!res.donations || res.donations.length === 0) {
+                donasiTbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-400">Belum ada data donasi.</td></tr>';
+            } else {
+                donasiTbody.innerHTML = res.donations.map((d, i) => {
+                    const statusLower = (d.status || 'pending').toLowerCase();
+                    const statusClass = statusLower === 'pending' ? 'status-pending' :
+                        ['terverifikasi','approved','verified','aktif'].includes(statusLower) ? 'status-verified' : 'status-rejected';
+                    return `<tr class="border-b hover:bg-slate-50">
+                        <td class="p-2 text-xs text-slate-500">${d.waktu || '-'}</td>
+                        <td class="p-2 font-semibold">${d.nama || '-'}</td>
+                        <td class="p-2 text-xs">${d.email || '-'}</td>
+                        <td class="p-2 font-bold text-emerald-700">Rp ${parseInt(d.nominal || 0).toLocaleString('id-ID')}</td>
+                        <td class="p-2 font-mono text-xs font-bold">${d.kode || '-'}</td>
+                        <td class="p-2">${d.bukti ? `<a href="${d.bukti}" target="_blank" class="text-blue-600 hover:underline text-xs font-bold">Lihat Bukti</a>` : '-'}</td>
+                        <td class="p-2"><span class="px-2 py-1 rounded-full text-xs font-bold ${statusClass}">${d.status || 'Pending'}</span></td>
+                        <td class="p-2">
+                            ${statusLower === 'pending' ? `
+                            <button onclick="verifikasiDonasi('${d.kode}', this)" class="text-xs bg-emerald-600 text-white px-2 py-1.5 rounded-lg font-bold hover:bg-emerald-700 transition-all">✓ Verifikasi</button>
+                            ` : '<span class="text-xs text-slate-400">Selesai</span>'}
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+
+            // Tabel users
+            const usersTbody = document.getElementById('admin-users-tbody');
+            if (!res.users || res.users.length === 0) {
+                usersTbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada user.</td></tr>';
+            } else {
+                usersTbody.innerHTML = res.users.map(u => `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-2 font-semibold">${u.nama || '-'}</td>
+                        <td class="p-2 text-xs">${u.email || '-'}</td>
+                        <td class="p-2 text-xs">${u.sekolah || '-'}</td>
+                        <td class="p-2 text-xs text-slate-500">${u.tanggal || '-'}</td>
+                        <td class="p-2"><span class="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">${u.level || 'Member'}</span></td>
+                    </tr>`).join('');
+            }
+            showToast('Data admin berhasil dimuat.', 'success');
+        }
+
+        async function verifikasiDonasi(kode, btnEl) {
+            if (!confirm(`Verifikasi donasi dengan kode ${kode}? Akun donatur akan langsung aktif.`)) return;
+            btnEl.disabled = true;
+            btnEl.innerText = '...';
+            const res = await callGASBackend('admin_verify_donation', { kode });
+            if (res.status === 'success') {
+                showToast(`Kode ${kode} berhasil diverifikasi!`, 'success');
+                loadAdminData();
+            } else {
+                btnEl.disabled = false;
+                btnEl.innerText = '✓ Verifikasi';
+                showToast('Gagal verifikasi: ' + res.message, 'error');
+            }
         }
 
         function showToast(message, type = 'info') {
