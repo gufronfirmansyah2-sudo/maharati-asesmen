@@ -49,7 +49,13 @@
 
     <!-- URL BACKEND APPS SCRIPT ANDA -->
     <script>
+        // =====================================================
+        // KONFIGURASI — HANYA ISI SATU URL INI
+        // URL deployment GAS (satu GAS untuk semua fitur)
+        // =====================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycby4FiDu9bFk2vG1AZbNrErGoj1QHA5ld_1eGdootCIdlfDOOebtDSG0jlt9QSujroWr/exec";
+        // Traktir Kopi pakai URL yang SAMA karena sudah digabung di satu GAS
+        const TRAKTIR_KOPI_GAS_URL = GAS_API_URL;
     </script>
 
     <!-- Sidebar Menu -->
@@ -1288,7 +1294,8 @@
                 sekolah: document.getElementById('r-sekolah').value,
                 email: document.getElementById('r-email').value,
                 password: document.getElementById('r-password').value,
-                kode_donasi: document.getElementById('r-kode-donasi').value.trim().toUpperCase()
+                kode_donasi: document.getElementById('r-kode-donasi').value.trim().toUpperCase(),
+                traktir_kopi_url: TRAKTIR_KOPI_GAS_URL // GAS gunakan ini untuk validasi kode DEV-
             });
             if(res.status === 'success') {
                 showToast(res.message, 'success');
