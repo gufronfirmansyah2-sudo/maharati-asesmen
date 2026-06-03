@@ -34,6 +34,12 @@
         .status-verified { background:#dcfce7; color:#166534; }
         .status-rejected { background:#fee2e2; color:#991b1b; }
 
+        /* Collapsible sections */
+        .section-body { transition: all 0.25s ease; overflow: hidden; }
+        .section-body.collapsed { display: none; }
+        .section-toggle-icon { transition: transform 0.25s ease; }
+        .section-toggle-icon.rotated { transform: rotate(-90deg); }
+
         /* [FIX 2] Rendered Markdown Styling - Lengkap dengan tabel */
         .rendered-html table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.8rem; }
         .rendered-html th { background: linear-gradient(to right, #f1f5f9, #e2e8f0); padding: 0.75rem 1rem; text-align: left; font-weight: 700; border: 1px solid #e2e8f0; color: #334155; font-size: 0.75rem; }
@@ -163,12 +169,66 @@
             <!-- VIEW: BERANDA / LANDING PAGE -->
             <div id="view-home" class="max-w-4xl mx-auto space-y-6 pb-6">
 
+                <!-- ── DASHBOARD MEMBER (tampil jika sudah login) ── -->
+                <div id="member-dashboard" class="hidden space-y-5">
+                    <!-- Greeting -->
+                    <div class="bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-10 translate-x-10"></div>
+                        <div class="relative z-10 flex items-center justify-between">
+                            <div>
+                                <p class="text-amber-100 text-sm font-medium mb-1">Selamat datang kembali ☕</p>
+                                <h2 class="text-2xl font-extrabold" id="dashboard-greeting-name">Sahabat Maharati</h2>
+                                <p class="text-amber-100 text-xs mt-1" id="dashboard-school-name"></p>
+                            </div>
+                            <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-3xl shadow-inner flex-shrink-0">☕</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button onclick="switchView('form')" class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all text-left group">
+                            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3 text-xl group-hover:bg-blue-600 group-hover:text-white transition-all">📝</div>
+                            <p class="font-bold text-sm text-slate-800">Buat Asesmen</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Generate soal baru</p>
+                        </button>
+                        <button onclick="switchView('history')" class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all text-left group">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3 text-xl group-hover:bg-emerald-600 group-hover:text-white transition-all">📂</div>
+                            <p class="font-bold text-sm text-slate-800">Riwayat</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Lihat asesmen lalu</p>
+                        </button>
+                        <button onclick="openTemplateModal()" class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all text-left group">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3 text-xl group-hover:bg-indigo-600 group-hover:text-white transition-all">📋</div>
+                            <p class="font-bold text-sm text-slate-800">Template CP/TP</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Pilih dari kurikulum</p>
+                        </button>
+                        <button onclick="switchView('settings')" class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all text-left group">
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mb-3 text-xl group-hover:bg-slate-700 group-hover:text-white transition-all">⚙️</div>
+                            <p class="font-bold text-sm text-slate-800">Pengaturan API</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Kelola kunci API</p>
+                        </button>
+                    </div>
+
+                    <!-- Riwayat Terbaru -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-slate-800">Asesmen Terbaru</h3>
+                            <button onclick="switchView('history')" class="text-xs text-blue-600 hover:underline font-semibold">Lihat semua →</button>
+                        </div>
+                        <div id="dashboard-recent-history">
+                            <p class="text-sm text-slate-400 text-center py-4">Belum ada riwayat asesmen.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── LANDING PAGE (tampil jika belum login) ── -->
+                <div id="landing-page">
+
                 <!-- Hero Banner -->
                 <div class="bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v5.3 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v2.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -184,15 +244,20 @@
 
                         <!-- 2 CTA Utama -->
                         <div class="flex flex-col sm:flex-row gap-3">
-                            <button onclick="switchView('form')" class="flex-1 bg-white/20 border border-white/40 text-white px-5 py-3.5 rounded-xl font-bold text-sm hover:bg-white/30 transition-all flex items-center justify-center gap-2">
+                            <!-- Tamu: putih solid, teks biru — kontras tinggi -->
+                            <button onclick="switchView('form')" class="flex-1 bg-white text-blue-700 px-5 py-3.5 rounded-xl font-bold text-sm hover:bg-blue-50 transition-all shadow-md flex items-center justify-center gap-2 border border-white/80">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                 Pakai Gratis Sebagai Tamu
                             </button>
-                            <button onclick="toggleAuthTab('register'); switchView('login')" class="flex-1 bg-amber-400 hover:bg-amber-300 text-amber-900 px-5 py-3.5 rounded-xl font-extrabold text-sm transition-all shadow-lg flex items-center justify-center gap-2">
+                            <!-- Sahabat: amber solid gelap — paling mencolok -->
+                            <button onclick="toggleAuthTab('register'); switchView('login')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-white px-5 py-3.5 rounded-xl font-extrabold text-sm transition-all shadow-xl ring-2 ring-amber-300/50 flex items-center justify-center gap-2">
                                 ☕ Daftar Sahabat Maharati
                             </button>
                         </div>
-                        <p class="text-white/60 text-xs text-center mt-1">Sudah punya akun? <button onclick="toggleAuthTab('login'); switchView('login')" class="text-white underline font-semibold hover:text-amber-300 transition-colors">Masuk di sini</button></p>
+                        <button onclick="toggleAuthTab('login'); switchView('login')" class="w-full mt-1 py-2.5 bg-white/10 hover:bg-white/20 border border-white/30 text-white/90 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                            Sudah punya akun? Masuk di sini
+                        </button>
                     </div>
                 </div>
 
@@ -265,6 +330,7 @@
                         </div>
                     </div>
                 </div>
+                </div> <!-- end landing-page -->
             </div>
 
             <!-- VIEW: FORM GENERATOR -->
@@ -272,9 +338,15 @@
                 <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm">
                     <div class="flex items-start gap-3">
                         <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                        <p class="text-sm text-blue-800 leading-relaxed">
-                            Lengkapi parameter di bawah ini. Hasilkan kisi-kisi (Blueprint) pada <strong>Langkah 1</strong>, lalu gunakan untuk menyusun Lembar Soal pada <strong>Langkah 2</strong>.
-                        </p>
+                        <div>
+                            <p class="text-sm text-blue-800 leading-relaxed">
+                                Lengkapi parameter di bawah ini. Hasilkan kisi-kisi (Blueprint) pada <strong>Langkah 1</strong>, lalu gunakan untuk menyusun Lembar Soal pada <strong>Langkah 2</strong>.
+                            </p>
+                            <p id="draft-save-indicator" class="hidden text-xs text-emerald-600 font-medium mt-1"></p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button type="button" onclick="if(confirm('Hapus draft tersimpan?')) { clearFormDraft(); showToast('Draft dihapus.', 'info'); }" class="text-xs text-slate-500 hover:text-rose-600 px-2 py-1 rounded border border-slate-200 hover:border-rose-200 transition-all">🗑️ Draft</button>
                     </div>
                     <div id="member-draft-controls" class="hidden flex gap-2">
                         <button type="button" onclick="saveDraftToCloud()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-sm transition-all flex items-center gap-1">
@@ -284,17 +356,31 @@
                 </div>
 
                 <form id="assesment-form" class="space-y-6" onsubmit="event.preventDefault();">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">1. Profil Guru & Lembaga</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <button type="button" onclick="toggleSection('sec-profil')" class="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">1</span>
+                                Profil Guru & Lembaga
+                            </h3>
+                            <svg id="icon-sec-profil" class="section-toggle-icon w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="sec-profil" class="section-body px-6 pb-6">
                         <div class="grid md:grid-cols-2 gap-4">
                             <div><label class="block text-sm font-medium text-slate-700 mb-1">Nama Guru</label><input type="text" id="f-nama" placeholder="Contoh: Gufron Firmansyah, S.Pd." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"></div>
                             <div><label class="block text-sm font-medium text-slate-700 mb-1">Asal Sekolah</label><input type="text" id="f-sekolah" placeholder="Contoh: SMK Negeri 2 Mantangai" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"></div>
                             <div class="md:col-span-2"><label class="block text-sm font-medium text-slate-700 mb-1">Konteks / Lingkungan Lokal Sekolah</label><input type="text" id="f-lokasi" placeholder="Contoh: Kapuas, dekat aliran sungai, perkebunan dan pertanian padi" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"></div>
                         </div>
-                    </div>
+                    </div></div>
 
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">2. Parameter Kurikulum Merdeka</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <button type="button" onclick="toggleSection('sec-kurikulum')" class="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">2</span>
+                                Parameter Kurikulum Merdeka
+                            </h3>
+                            <svg id="icon-sec-kurikulum" class="section-toggle-icon w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="sec-kurikulum" class="section-body px-6 pb-6">
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Mata Pelajaran</label>
@@ -337,10 +423,17 @@
                                 <div id="bab-container" class="space-y-4"></div>
                             </div>
                         </div>
-                    </div>
+                    </div></div>
 
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">3. Struktur & Spesifikasi Evaluasi</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <button type="button" onclick="toggleSection('sec-evaluasi')" class="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">3</span>
+                                Struktur & Spesifikasi Evaluasi
+                            </h3>
+                            <svg id="icon-sec-evaluasi" class="section-toggle-icon w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="sec-evaluasi" class="section-body px-6 pb-6">
                         <div class="grid md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Jenis Asesmen</label>
@@ -380,7 +473,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div></div>
 
                     <div class="flex flex-col sm:flex-row gap-4 pt-4">
                         <button type="button" id="btn-wizard-step1" onclick="generateWizardStep1()" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all flex justify-center items-center gap-2">
@@ -1276,11 +1369,9 @@
         }
 
         async function generateWizardStep1() {
+            // Validasi ketat sebelum generate
+            if (!validateFormBeforeGenerate()) return;
             const formData = getFormData();
-            if(!formData.mapel || !formData.cp || !formData.babGabung) {
-                showToast('Harap lengkapi Isian Mata Pelajaran, CP, dan Minimal 1 Bab!', 'error');
-                return;
-            }
             // AQ. token punya prioritas (direct browser), lalu AIzaSy key, lalu kosong (pakai system key)
             const apiKey = localStorage.getItem('aq_token') || localStorage.getItem('gemini_api_key') || "";
             const selectedModel = document.getElementById('api-provider').value || 'gemini-2.5-flash';
@@ -1309,6 +1400,7 @@
                 document.getElementById('out-prompt2').value = buildPrompt2(formData);
                 endLoadingProgress();
                 setTimeout(() => showLoading(false), 500);
+                saveFormDraft(); // Simpan draft setelah berhasil generate
                 showToast('Blueprint berhasil dibuat! Silakan tinjau sebelum lanjut ke Langkah 2.', 'success');
                 // Tampilkan indikator badge di tab
                 document.getElementById('rtab-blueprint-badge').classList.remove('hidden');
@@ -1625,6 +1717,7 @@
             } else {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada riwayat tercatat.</td></tr>`;
             }
+            updateDashboardHistory(); // Sinkron dashboard dengan data terbaru
         }
 
         function loadFormFromHistory(index) {
@@ -1685,25 +1778,74 @@
 
         function updateAuthUI() {
             if(currentUser) {
+                const isAdmin = currentUser.level === 'Admin';
+
+                // Sidebar — ganti teks + arahkan ke beranda (bukan login form)
                 document.getElementById('nav-auth-text').innerText = currentUser.nama;
+                const navAuthBtn = document.getElementById('nav-auth-btn');
+                if (navAuthBtn) {
+                    navAuthBtn.onclick = () => switchView('home');
+                    navAuthBtn.title = 'Kembali ke Beranda';
+                }
+
                 document.getElementById('nav-history-btn').classList.remove('hidden');
                 document.getElementById('nav-logout-btn').classList.remove('hidden');
+
+                // Badge di header
                 const badge = document.getElementById('user-badge');
                 badge.classList.remove('hidden');
                 badge.classList.add('flex');
-                // Semua yang punya akun = Sahabat Maharati
-                badge.className = "flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-300";
-                badge.innerHTML = `☕ <span id="user-name-display" class="ml-1">${currentUser.nama}</span> <span class="ml-1 text-[9px] bg-amber-300 px-1.5 py-0.5 rounded-full font-extrabold">SAHABAT</span>`;
-                document.getElementById('member-draft-controls').classList.remove('hidden');
-                // Tampilkan tombol admin jika level = 'Admin' (dari spreadsheet)
-                if (currentUser.level === 'Admin') {
-                    const adminBtn = document.getElementById('nav-admin-btn');
-                    if (adminBtn) adminBtn.classList.remove('hidden');
-                    // Badge khusus Admin
+                if (isAdmin) {
                     badge.className = "flex items-center px-3 py-1.5 rounded-full bg-purple-100 text-purple-800 text-xs font-bold border border-purple-300";
                     badge.innerHTML = `🛡️ <span id="user-name-display" class="ml-1">${currentUser.nama}</span> <span class="ml-1 text-[9px] bg-purple-300 px-1.5 py-0.5 rounded-full font-extrabold">ADMIN</span>`;
+                    const adminBtn = document.getElementById('nav-admin-btn');
+                    if (adminBtn) adminBtn.classList.remove('hidden');
+                } else {
+                    badge.className = "flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-300";
+                    badge.innerHTML = `☕ <span id="user-name-display" class="ml-1">${currentUser.nama}</span> <span class="ml-1 text-[9px] bg-amber-300 px-1.5 py-0.5 rounded-full font-extrabold">SAHABAT</span>`;
                 }
+
+                document.getElementById('member-draft-controls').classList.remove('hidden');
+
+                // Beranda — tampilkan dashboard, sembunyikan landing page
+                const dashboard  = document.getElementById('member-dashboard');
+                const landingPage = document.getElementById('landing-page');
+                if (dashboard)  dashboard.classList.remove('hidden');
+                if (landingPage) landingPage.classList.add('hidden');
+
+                // Isi dashboard dengan data user
+                const greetingName = document.getElementById('dashboard-greeting-name');
+                const schoolName   = document.getElementById('dashboard-school-name');
+                if (greetingName) greetingName.textContent = currentUser.nama;
+                if (schoolName)   schoolName.textContent   = currentUser.sekolah || '';
+
+                // Update riwayat terbaru di dashboard
+                updateDashboardHistory();
             }
+        }
+
+        function updateDashboardHistory() {
+            const container = document.getElementById('dashboard-recent-history');
+            if (!container) return;
+            const history = (window.loadedHistory || []).slice(0, 3);
+            if (history.length === 0) {
+                container.innerHTML = '<p class="text-sm text-slate-400 text-center py-4 italic">Belum ada riwayat asesmen.</p>';
+                return;
+            }
+            container.innerHTML = history.map((item, i) => `
+                <div class="flex items-center justify-between py-3 ${i < history.length-1 ? 'border-b border-slate-100' : ''}">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold">${i+1}</div>
+                        <div class="min-w-0">
+                            <p class="font-semibold text-slate-800 text-sm truncate">${item.mapel}</p>
+                            <p class="text-xs text-slate-400">Kelas ${item.kelas} • ${item.tanggal}</p>
+                        </div>
+                    </div>
+                    ${item.blueprint || item.soal ? `
+                    <button onclick="viewSavedResult(${i})" class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-200 transition-all flex-shrink-0 ml-2">Buka</button>
+                    ` : ''}
+                </div>
+            `).join('');
         }
 
         function toggleAuthTab(tab) {
@@ -1756,7 +1898,17 @@
             const titles = { 'home': 'Beranda', 'form': 'Generator Asesmen', 'settings': 'Pengaturan & API Key', 'login': 'Otentikasi Akun', 'result': 'Hasil Output', 'history': 'Riwayat Asesmen', 'admin': '🛡️ Panel Admin' };
             document.getElementById('header-title').innerText = titles[viewId] || 'Asesmen Maharati';
             if (viewId === 'settings') updateApiLevelInfo();
-            if (viewId === 'form') autoFillFormFromUser();
+            if (viewId === 'form') {
+                autoFillFormFromUser();
+                startAutoSave();
+                // Restore draft jika form masih kosong
+                const cpEmpty = !document.getElementById('f-cp')?.value.trim();
+                const mapelEmpty = !document.getElementById('f-mapel')?.value.trim();
+                if (cpEmpty && mapelEmpty) {
+                    const restored = restoreFormDraft();
+                    if (restored) showToast('📋 Draft tersimpan sebelumnya berhasil dimuat.', 'info');
+                }
+            }
             if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
                 toggleSidebar();
             }
@@ -1804,6 +1956,14 @@
             document.getElementById('user-badge').classList.remove('flex');
             document.getElementById('member-draft-controls').classList.add('hidden');
             document.getElementById('history-table-body').innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada riwayat aktivitas yang tersimpan.</td></tr>';
+            // Kembalikan beranda ke landing page
+            const dashboard  = document.getElementById('member-dashboard');
+            const landingPage = document.getElementById('landing-page');
+            if (dashboard)   dashboard.classList.add('hidden');
+            if (landingPage) landingPage.classList.remove('hidden');
+            // Kembalikan nav auth ke login
+            const navAuthBtn = document.getElementById('nav-auth-btn');
+            if (navAuthBtn) navAuthBtn.onclick = () => { toggleAuthTab('login'); switchView('login'); };
             switchView('home');
             showToast('Berhasil logout. Sampai jumpa!', 'info');
         }
@@ -2221,6 +2381,158 @@
             // Hanya isi jika masih kosong (tidak override yang sudah diketik user)
             if (namaEl    && !namaEl.value.trim())    namaEl.value    = currentUser.nama    || '';
             if (sekolahEl && !sekolahEl.value.trim()) sekolahEl.value = currentUser.sekolah || '';
+        }
+
+        // =============================================
+        // AUTO-SAVE FORM ke localStorage (setiap 30 detik + on change)
+        // =============================================
+        const FORM_DRAFT_KEY = 'maharati_form_draft';
+        let autoSaveInterval = null;
+        let lastSaveTime = null;
+
+        function saveFormDraft() {
+            const babList = [];
+            document.querySelectorAll('.bab-item').forEach(el => {
+                babList.push({
+                    bab:     el.querySelector('.input-bab')?.value || '',
+                    tp:      el.querySelector('.input-tp')?.value || '',
+                    lingkup: el.querySelector('.input-lingkup')?.value || ''
+                });
+            });
+            const draft = {
+                nama:         document.getElementById('f-nama')?.value || '',
+                sekolah:      document.getElementById('f-sekolah')?.value || '',
+                lokasi:       document.getElementById('f-lokasi')?.value || '',
+                mapel:        document.getElementById('f-mapel')?.value || '',
+                tujuan:       document.getElementById('f-tujuan')?.value || '',
+                jenjang:      document.getElementById('f-jenjang')?.value || '',
+                kelas:        document.getElementById('f-kelas')?.value || '',
+                fase:         document.getElementById('f-fase')?.value || '',
+                cp:           document.getElementById('f-cp')?.value || '',
+                jenisAsesmen: document.getElementById('f-jenis-asesmen')?.value || '',
+                waktu:        document.getElementById('f-waktu')?.value || '',
+                jumlah:       document.getElementById('f-jumlah')?.value || '',
+                komposisi:    document.getElementById('f-komposisi')?.value || '',
+                distribusi:   document.getElementById('f-distribusi')?.value || '',
+                babList,
+                savedAt: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})
+            };
+            // Hanya simpan jika ada konten bermakna
+            if (draft.mapel || draft.cp || babList.some(b => b.bab)) {
+                localStorage.setItem(FORM_DRAFT_KEY, JSON.stringify(draft));
+                lastSaveTime = draft.savedAt;
+                const indicator = document.getElementById('draft-save-indicator');
+                if (indicator) {
+                    indicator.textContent = `💾 Draft tersimpan ${draft.savedAt}`;
+                    indicator.classList.remove('hidden');
+                }
+            }
+        }
+
+        function restoreFormDraft() {
+            const raw = localStorage.getItem(FORM_DRAFT_KEY);
+            if (!raw) return false;
+            try {
+                const d = JSON.parse(raw);
+                if (!d.mapel && !d.cp) return false;
+                if (document.getElementById('f-nama'))     document.getElementById('f-nama').value     = d.nama || '';
+                if (document.getElementById('f-sekolah'))  document.getElementById('f-sekolah').value  = d.sekolah || '';
+                if (document.getElementById('f-lokasi'))   document.getElementById('f-lokasi').value   = d.lokasi || '';
+                if (document.getElementById('f-mapel'))    document.getElementById('f-mapel').value    = d.mapel || '';
+                if (document.getElementById('f-tujuan'))   document.getElementById('f-tujuan').value   = d.tujuan || '';
+                if (document.getElementById('f-jenjang'))  document.getElementById('f-jenjang').value  = d.jenjang || '';
+                if (document.getElementById('f-kelas'))    document.getElementById('f-kelas').value    = d.kelas || '';
+                if (document.getElementById('f-fase'))     document.getElementById('f-fase').value     = d.fase || '';
+                if (document.getElementById('f-cp'))       document.getElementById('f-cp').value       = d.cp || '';
+                if (document.getElementById('f-jenis-asesmen')) document.getElementById('f-jenis-asesmen').value = d.jenisAsesmen || '';
+                if (document.getElementById('f-waktu'))    document.getElementById('f-waktu').value    = d.waktu || '90';
+                if (document.getElementById('f-jumlah'))   document.getElementById('f-jumlah').value   = d.jumlah || '40';
+                if (document.getElementById('f-komposisi'))document.getElementById('f-komposisi').value= d.komposisi || '';
+                if (document.getElementById('f-distribusi'))document.getElementById('f-distribusi').value= d.distribusi || '';
+                // Restore bab
+                if (d.babList && d.babList.length > 0) {
+                    document.getElementById('bab-container').innerHTML = '';
+                    babCount = 0;
+                    d.babList.forEach(b => addBabWithValues(b.bab, b.tp, b.lingkup));
+                }
+                toggleSpesifikasiSoal();
+                autoFillFormFromUser(); // User data lebih prioritas dari draft
+                return true;
+            } catch(e) { return false; }
+        }
+
+        function startAutoSave() {
+            clearInterval(autoSaveInterval);
+            autoSaveInterval = setInterval(saveFormDraft, 30000); // Setiap 30 detik
+        }
+
+        function clearFormDraft() {
+            localStorage.removeItem(FORM_DRAFT_KEY);
+            const indicator = document.getElementById('draft-save-indicator');
+            if (indicator) indicator.classList.add('hidden');
+        }
+
+        // =============================================
+        // VALIDASI FORM SEBELUM GENERATE
+        // =============================================
+        function validateFormBeforeGenerate() {
+            const errors = [];
+            const mapel = document.getElementById('f-mapel').value.trim();
+            const cp    = document.getElementById('f-cp').value.trim();
+
+            if (!mapel || mapel.length < 3) {
+                errors.push({ field: 'f-mapel', msg: 'Mata pelajaran wajib diisi (minimal 3 karakter).' });
+            }
+            if (!cp || cp.length < 30) {
+                errors.push({ field: 'f-cp', msg: 'Capaian Pembelajaran (CP) wajib diisi dan minimal 30 karakter.' });
+            }
+
+            // Cek bab
+            const babItems = document.querySelectorAll('.bab-item');
+            let hadValidBab = false;
+            babItems.forEach(el => {
+                const bab = el.querySelector('.input-bab')?.value.trim() || '';
+                if (bab.length >= 3) hadValidBab = true;
+            });
+            if (!hadValidBab) {
+                errors.push({ field: 'bab-container', msg: 'Isi minimal 1 nama Bab Materi.' });
+            }
+
+            if (errors.length > 0) {
+                // Highlight field bermasalah
+                errors.forEach(e => {
+                    const el = document.getElementById(e.field);
+                    if (el) {
+                        el.classList.add('ring-2', 'ring-rose-400', 'border-rose-400');
+                        setTimeout(() => el.classList.remove('ring-2','ring-rose-400','border-rose-400'), 3000);
+                    }
+                });
+                // Pastikan section yang bermasalah terbuka
+                const cpEl = document.getElementById('f-cp');
+                if (cpEl) {
+                    const sec = document.getElementById('sec-kurikulum');
+                    if (sec && sec.classList.contains('collapsed')) toggleSection('sec-kurikulum');
+                }
+                showToast('⚠️ ' + errors[0].msg, 'error');
+                return false;
+            }
+            return true;
+        }
+
+        // =============================================
+        // COLLAPSIBLE SECTIONS
+        // =============================================
+        function toggleSection(id) {
+            const body = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            if (!body) return;
+            if (body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                if (icon) icon.classList.remove('rotated');
+            } else {
+                body.classList.add('collapsed');
+                if (icon) icon.classList.add('rotated');
+            }
         }
 
         function showToast(message, type = 'info') {
