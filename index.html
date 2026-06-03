@@ -90,6 +90,9 @@
             <button onclick="switchView('history')" class="nav-btn w-full text-left p-3 rounded-xl flex items-center text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-all font-medium hidden" data-target="history" id="nav-history-btn">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Riwayat Asesmen
             </button>
+            <button onclick="handleLogout()" class="hidden w-full text-left p-3 rounded-xl flex items-center text-rose-600 hover:bg-rose-50 transition-all font-medium" id="nav-logout-btn">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg> Keluar (Logout)
+            </button>
         </nav>
         <div class="p-4 border-t border-slate-200 bg-slate-50 mt-auto space-y-2">
             <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Pengembang Aplikasi:</p>
@@ -197,7 +200,16 @@
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                         <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">2. Parameter Kurikulum Merdeka</h3>
                         <div class="grid md:grid-cols-2 gap-4">
-                            <div><label class="block text-sm font-medium text-slate-700 mb-1">Mata Pelajaran</label><input type="text" id="f-mapel" placeholder="Contoh: Pendidikan Pancasila" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" required></div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Mata Pelajaran</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="f-mapel" placeholder="Contoh: Pendidikan Pancasila" class="flex-1 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" required>
+                                    <button type="button" onclick="openTemplateModal()" class="px-3 py-2.5 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-all whitespace-nowrap flex items-center gap-1.5" title="Pilih CP/TP dari template kurikulum">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                        Template CP/TP
+                                    </button>
+                                </div>
+                            </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Tujuan Asesmen</label>
                                 <select id="f-tujuan" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white transition-all">
@@ -450,7 +462,13 @@
             <!-- VIEW: RIWAYAT MEMBER -->
             <div id="view-history" class="hidden max-w-4xl mx-auto space-y-6">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h2 class="text-xl font-bold text-slate-900 mb-4">Riwayat Penyusunan Asesmen</h2>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <h2 class="text-xl font-bold text-slate-900">Riwayat Penyusunan Asesmen</h2>
+                        <div class="relative">
+                            <input type="text" id="history-search" oninput="filterHistory(this.value)" placeholder="Cari mapel atau kelas..." class="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full sm:w-60">
+                            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-slate-600">
                             <thead class="bg-slate-50 text-slate-700 uppercase font-bold text-xs">
@@ -459,12 +477,76 @@
                                     <th class="p-3">Mata Pelajaran</th>
                                     <th class="p-3">Kelas</th>
                                     <th class="p-3">Aksi & Integrasi</th>
+                                    <th class="p-3">Hapus</th>
                                 </tr>
                             </thead>
                             <tbody id="history-table-body">
                                 <tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada riwayat aktivitas yang tersimpan.</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Template CP/TP -->
+            <div id="template-modal" class="fixed inset-0 bg-slate-900/60 z-40 flex items-center justify-center hidden p-4">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+                    <!-- Header Modal -->
+                    <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-blue-50 flex-shrink-0">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Template Kurikulum CP/TP</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Pilih mapel & fase, lalu terapkan ke formulir. Semua teks bisa diedit.</p>
+                        </div>
+                        <button onclick="closeTemplateModal()" class="p-2 rounded-xl hover:bg-slate-200 text-slate-500 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <!-- Body Modal -->
+                    <div class="flex-1 overflow-y-auto p-5 space-y-4">
+                        <!-- Step 1: Pilih Mapel & Fase -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">Mata Pelajaran</label>
+                                <select id="tmpl-mapel" onchange="onTemplateMapelChange()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-sm">
+                                    <option value="">-- Pilih Mapel --</option>
+                                </select>
+                            </div>
+                            <div id="tmpl-fase-wrap">
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">Fase</label>
+                                <select id="tmpl-fase" onchange="onTemplateFaseChange()" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-sm">
+                                    <option value="">-- Pilih Fase --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Preview & Edit CP -->
+                        <div id="tmpl-cp-container" class="hidden">
+                            <label class="block text-xs font-bold text-slate-600 mb-1.5">Capaian Pembelajaran (CP) — <span class="text-indigo-600 font-normal">bisa diedit sebelum diterapkan</span></label>
+                            <textarea id="tmpl-cp-text" rows="5" class="w-full p-3 border border-indigo-200 bg-indigo-50 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"></textarea>
+                        </div>
+                        <!-- Daftar Bab -->
+                        <div id="tmpl-bab-container" class="hidden">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-xs font-bold text-slate-600">Pilih Bab yang Akan Ditambahkan</label>
+                                <div class="flex gap-2">
+                                    <button type="button" onclick="tmplCheckAll(true)" class="text-xs text-indigo-600 hover:underline font-medium">Pilih Semua</button>
+                                    <span class="text-slate-300">|</span>
+                                    <button type="button" onclick="tmplCheckAll(false)" class="text-xs text-slate-500 hover:underline font-medium">Batal Semua</button>
+                                </div>
+                            </div>
+                            <div id="tmpl-bab-list" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
+                        </div>
+                        <!-- Kosong -->
+                        <div id="tmpl-empty" class="hidden py-8 text-center text-slate-400 text-sm">
+                            <svg class="w-10 h-10 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                            Belum ada template tersedia.<br>Tambahkan data di sheet <strong>Templates_CP</strong> dan <strong>Templates_Bab</strong>.
+                        </div>
+                    </div>
+                    <!-- Footer Modal -->
+                    <div class="p-4 border-t border-slate-200 flex justify-end gap-3 flex-shrink-0 bg-slate-50">
+                        <button type="button" onclick="closeTemplateModal()" class="px-4 py-2.5 border border-slate-300 rounded-xl font-bold text-sm text-slate-700 hover:bg-slate-100 transition-all">Batal</button>
+                        <button type="button" onclick="applyTemplate()" id="tmpl-apply-btn" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                            ✅ Terapkan ke Formulir
+                        </button>
                     </div>
                 </div>
             </div>
@@ -644,21 +726,46 @@
 
         function buildPrompt1(d) {
             const isNonTest = ['Praktik', 'Produk', 'Projek', 'Portofolio'].includes(d.jenisAsesmen);
-            return `Tahap 1 -Blueprint\nAnda adalah ahli asesmen pendidikan dan perancang evaluasi pembelajaran Kurikulum Merdeka dengan pendekatan pembelajaran mendalam.\nTugas Anda adalah menyusun blueprint/kisi-kisi asesmen sumatif yang valid, proporsional, kontekstual, dan benar-benar mengukur ketercapaian Capaian Pembelajaran (CP), diturunkan ke TP, lalu ke indikator.\nJANGAN buat produk asesmennya dulu — hanya blueprint dalam bentuk TEXT/MARKDOWN.\n\n==================================================\nIDENTITAS ASESMEN\n==================================================\n-Mata pelajaran: ${d.mapel}\n-Jenjang : ${d.jenjang}\n-Kelas/Semester: ${d.kelas} (Fase ${d.fase})\n-Bab Materi: ${d.babGabung}\n-Jenis asesmen: ${d.tujuan} (${d.jenisAsesmen})\nKonteks lokal: ${d.lokasi}\nWaktu: ${d.waktu} Menit\n${!isNonTest ? `Jumlah soal: ${d.jumlah} Soal | Komposisi: ${d.komposisi}` : `Ketentuan Asesmen: Berupa Rubrik/Tugas Kinerja terstruktur`}\n\n==================================================\nCAPAIAN PEMBELAJARAN (CP)\n==================================================\n${d.cp}\n\n==================================================\nTUJUAN PEMBELAJARAN (TP)\n==================================================\n${d.tpGabung}\n\n==================================================\nLINGKUP MATERI\n==================================================\n${d.lingkupGabung || 'Sesuai dengan Bab dan TP di atas.'}\n\n==================================================\nKETENTUAN ASESMEN\n==================================================\n${!isNonTest ? `Jumlah soal: ${d.jumlah} (${d.komposisi})\nDistribusi Bloom: ${d.distribusi}\n\nDistribusi DoK:\n- DoK 1 = recall dasar\n- DoK 2 = aplikasi konsep\n- DoK 3 = penalaran strategis\n- DoK 4 = investigasi/refleksi mendalam` : `Sajikan kriteria asesmen yang relevan (misalnya dimensi rubrik: Perencanaan, Pelaksanaan, Hasil Akhir/Produk, dan Presentasi).`}\n\n==================================================\nKONTEKS SOAL / TUGAS\n==================================================\nGunakan konteks yang dekat dengan kehidupan siswa di ${d.lokasi} seperti: Sosial, Budaya, Ekonomi, geografi, kebiasaan lokal.\n\n==================================================\nATURAN KUALITAS\n==================================================\n1. Seluruh asesmen mengukur ketercapaian CP. Hindari hafalan langsung.\n2. Harus menuntut analisis/evaluasi.\n${!isNonTest ? `3. Minimal 25% soal menggunakan stimulus (gambar deskripsi, tabel, grafik, teks).\n4. Minimal 15% Literasi, 15% Numerasi.` : `3. Tugas atau proyek harus aplikatif dan dapat diselesaikan dalam rentang waktu yang wajar.`}\n\n==================================================\nTUGAS\n==================================================\nBuat Blueprint dengan struktur:\nTABEL 1: CP dan TP lengkap.\n${!isNonTest ? `TABEL 2 (Matriks Kisi-kisi):\nNo | Elemen CP | TP | Indikator Soal (sertakan konteks ${d.lokasi}) | Materi | Bloom/DoK | Stimulus\n\nTampilkan rekap:\nTabel Distribusi (Target vs Aktual) untuk LOTS, MOTS, HOTS, Stimulus, Literasi, Numerasi.` : `TABEL 2 (Kisi-kisi Kinerja):\nElemen CP | TP | Indikator Kinerja (sertakan konteks ${d.lokasi}) | Materi | Kriteria Keberhasilan`}\n`;
+            return `Tahap 1 -Blueprint\nPENTING: Langsung tulis dokumen blueprint tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau kalimat serupa. Output adalah dokumen profesional siap pakai.\n\nAnda adalah ahli asesmen pendidikan dan perancang evaluasi pembelajaran Kurikulum Merdeka dengan pendekatan pembelajaran mendalam.\nTugas Anda adalah menyusun blueprint/kisi-kisi asesmen sumatif yang valid, proporsional, kontekstual, dan benar-benar mengukur ketercapaian Capaian Pembelajaran (CP), diturunkan ke TP, lalu ke indikator.\nJANGAN buat produk asesmennya dulu — hanya blueprint dalam bentuk TEXT/MARKDOWN.\n\n==================================================\nIDENTITAS ASESMEN\n==================================================\n-Mata pelajaran: ${d.mapel}\n-Jenjang : ${d.jenjang}\n-Kelas/Semester: ${d.kelas} (Fase ${d.fase})\n-Bab Materi: ${d.babGabung}\n-Jenis asesmen: ${d.tujuan} (${d.jenisAsesmen})\nKonteks lokal: ${d.lokasi}\nWaktu: ${d.waktu} Menit\n${!isNonTest ? `Jumlah soal: ${d.jumlah} Soal | Komposisi: ${d.komposisi}` : `Ketentuan Asesmen: Berupa Rubrik/Tugas Kinerja terstruktur`}\n\n==================================================\nCAPAIAN PEMBELAJARAN (CP)\n==================================================\n${d.cp}\n\n==================================================\nTUJUAN PEMBELAJARAN (TP)\n==================================================\n${d.tpGabung}\n\n==================================================\nLINGKUP MATERI\n==================================================\n${d.lingkupGabung || 'Sesuai dengan Bab dan TP di atas.'}\n\n==================================================\nKETENTUAN ASESMEN\n==================================================\n${!isNonTest ? `Jumlah soal: ${d.jumlah} (${d.komposisi})\nDistribusi Bloom: ${d.distribusi}\n\nDistribusi DoK:\n- DoK 1 = recall dasar\n- DoK 2 = aplikasi konsep\n- DoK 3 = penalaran strategis\n- DoK 4 = investigasi/refleksi mendalam` : `Sajikan kriteria asesmen yang relevan (misalnya dimensi rubrik: Perencanaan, Pelaksanaan, Hasil Akhir/Produk, dan Presentasi).`}\n\n==================================================\nKONTEKS SOAL / TUGAS\n==================================================\nGunakan konteks yang dekat dengan kehidupan siswa di ${d.lokasi} seperti: Sosial, Budaya, Ekonomi, geografi, kebiasaan lokal.\n\n==================================================\nATURAN KUALITAS\n==================================================\n1. Seluruh asesmen mengukur ketercapaian CP. Hindari hafalan langsung.\n2. Harus menuntut analisis/evaluasi.\n${!isNonTest ? `3. Minimal 25% soal menggunakan stimulus (gambar deskripsi, tabel, grafik, teks).\n4. Minimal 15% Literasi, 15% Numerasi.` : `3. Tugas atau proyek harus aplikatif dan dapat diselesaikan dalam rentang waktu yang wajar.`}\n\n==================================================\nTUGAS\n==================================================\nBuat Blueprint dengan struktur:\nTABEL 1: CP dan TP lengkap.\n${!isNonTest ? `TABEL 2 (Matriks Kisi-kisi):\nNo | Elemen CP | TP | Indikator Soal (sertakan konteks ${d.lokasi}) | Materi | Bloom/DoK | Stimulus\n\nTampilkan rekap:\nTabel Distribusi (Target vs Aktual) untuk LOTS, MOTS, HOTS, Stimulus, Literasi, Numerasi.` : `TABEL 2 (Kisi-kisi Kinerja):\nElemen CP | TP | Indikator Kinerja (sertakan konteks ${d.lokasi}) | Materi | Kriteria Keberhasilan`}\n`;
         }
 
         function buildPrompt2(d) {
             const isNonTest = ['Praktik', 'Produk', 'Projek', 'Portofolio'].includes(d.jenisAsesmen);
             if(isNonTest) {
-                return `Tahap 2 -Produk Asesmen\nBerdasarkan blueprint asesmen kinerja/projek yang telah kamu buat sebelumnya, buat dokumen asesmen lengkap secara berurutan.\n\n==================================================\nFORMAT OUTPUT\n==================================================\nBAGIAN A — INSTRUMEN TUGAS\n- Header Identitas.\n- Deskripsi Tugas / Skenario Projek.\n- Langkah-langkah pelaksanaan untuk siswa.\n- Ketentuan pengumpulan.\n\nBAGIAN B — RUBRIK PENILAIAN\nSajikan tabel rubrik penilaian dengan kriteria yang jelas (Skala 1-4 atau Kurang-Sangat Baik).\nSertakan panduan konversi nilai akhir.`;
+                return `Tahap 2 -Produk Asesmen\nPENTING: Langsung tulis dokumen asesmen tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau sejenisnya. Output adalah dokumen profesional siap pakai.\n\nBerdasarkan blueprint asesmen kinerja/projek yang telah kamu buat sebelumnya, buat dokumen asesmen lengkap secara berurutan.\n\n==================================================\nFORMAT OUTPUT\n==================================================\nBAGIAN A — INSTRUMEN TUGAS\n- Header Identitas.\n- Deskripsi Tugas / Skenario Projek.\n- Langkah-langkah pelaksanaan untuk siswa.\n- Ketentuan pengumpulan.\n\nBAGIAN B — RUBRIK PENILAIAN\nSajikan tabel rubrik penilaian dengan kriteria yang jelas (Skala 1-4 atau Kurang-Sangat Baik).\nSertakan panduan konversi nilai akhir.`;
             }
-            return `Tahap 2 -Naskah Soal\nBerdasarkan naskah blueprint/kisi-kisi asesmen yang telah kamu buat sebelumnya, buat paket soal lengkap secara berurutan.\n\n==================================================\nATURAN UMUM\n==================================================\n1. Ikuti blueprint secara konsisten (nomor, level, konteks).\n2. Pilihan ganda A-D (SMP), A-E (SMA/SMK). Panjang opsi homogen.\n3. Distraktor logis dan mencerminkan miskonsepsi.\n\n==================================================\nATURAN STIMULUS\n==================================================\n- Relevan, valid, dan logis.\n- Jika ada gambar, jangan buat gambar tapi gunakan deskripsi [ILUSTRASI: deskripsi].\n\n==================================================\nFORMAT OUTPUT\n==================================================\nBAGIAN A — SOAL ASESMEN\n(Tampilkan TANPA KUNCI)\n- Header Identitas.\n- Petunjuk mengerjakan.\n- Seluruh Soal (berurutan).\n\nBAGIAN B — KUNCI & PEMBAHASAN\n1. Tabel Kunci Cepat\n2. Kunci dan Pembahasan detail tiap soal.\nAturan: LOTS 2 kalimat, MOTS 3 kalimat, HOTS 4 kalimat (tambahkan "Catatan Pedagogis"). Tambahkan "Miskonsepsi Umum" di akhir tiap pembahasan.\n3. Analisis ketercapaian TP & Rekomendasi Tindak Lanjut.`;
+            return `Tahap 2 -Naskah Soal\nPENTING: Langsung tulis naskah soal tanpa kalimat pembuka atau penutup. Jangan awali dengan "Baik,", "Tentu,", "Berikut adalah...", atau sejenisnya. Output adalah dokumen profesional siap pakai.\n\nBerdasarkan naskah blueprint/kisi-kisi asesmen yang telah kamu buat sebelumnya, buat paket soal lengkap secara berurutan.\n\n==================================================\nATURAN UMUM\n==================================================\n1. Ikuti blueprint secara konsisten (nomor, level, konteks).\n2. Pilihan ganda A-D (SMP), A-E (SMA/SMK). Panjang opsi homogen.\n3. Distraktor logis dan mencerminkan miskonsepsi.\n\n==================================================\nATURAN STIMULUS\n==================================================\n- Relevan, valid, dan logis.\n- Jika ada gambar, jangan buat gambar tapi gunakan deskripsi [ILUSTRASI: deskripsi].\n\n==================================================\nFORMAT OUTPUT\n==================================================\nBAGIAN A — SOAL ASESMEN\n(Tampilkan TANPA KUNCI)\n- Header Identitas.\n- Petunjuk mengerjakan.\n- Seluruh Soal (berurutan).\n\nBAGIAN B — KUNCI & PEMBAHASAN\n1. Tabel Kunci Cepat\n2. Kunci dan Pembahasan detail tiap soal.\nAturan: LOTS 2 kalimat, MOTS 3 kalimat, HOTS 4 kalimat (tambahkan "Catatan Pedagogis"). Tambahkan "Miskonsepsi Umum" di akhir tiap pembahasan.\n3. Analisis ketercapaian TP & Rekomendasi Tindak Lanjut.`;
         }
 
         // [FIX 3] Ganti formatMarkdown & hapus renderHTMLTable — gunakan marked.js
+        // Bersihkan kalimat pembuka AI yang tidak perlu (cadangan jika prompt tidak cukup)
+        function cleanAIResponse(text) {
+            if (!text) return text;
+            const lines = text.split('\n');
+            let startIdx = 0;
+            // Pola kalimat pembuka AI dalam Bahasa Indonesia
+            const openerPatterns = [
+                /^(baik|tentu|oke|okay|berikut|berikut adalah|berikut ini|saya akan|dengan senang|sebagai|di bawah ini|sesuai dengan)/i,
+                /^(tahap 1|tahap 2)\s*[-–]\s*(blueprint|naskah soal|produk asesmen)\s*$/i,
+            ];
+            // Skip baris kosong dan baris yang match pola pembuka di awal
+            while (startIdx < lines.length) {
+                const line = lines[startIdx].trim();
+                if (line === '') { startIdx++; continue; }
+                const isOpener = openerPatterns.some(p => p.test(line));
+                // Baris pembuka biasanya pendek (< 200 karakter) dan tidak mengandung | (tabel)
+                if (isOpener && line.length < 250 && !line.includes('|')) {
+                    startIdx++;
+                } else {
+                    break;
+                }
+            }
+            return lines.slice(startIdx).join('\n').trimStart();
+        }
+
         function formatMarkdown(text) {
             marked.use({ breaks: true, gfm: true });
-            return marked.parse(text);
+            return marked.parse(cleanAIResponse(text));
         }
 
         async function callGeminiAPI(selectedModel, apiKey, prompt) {
@@ -711,8 +818,8 @@
             switchResultTab('blueprint');
             try {
                 const textResult = await callGeminiAPI(selectedModel, apiKey, prompt1);
-                cachedBlueprintResultText = textResult;
-                document.getElementById('res-blueprint').innerHTML = formatMarkdown(textResult);
+                cachedBlueprintResultText = cleanAIResponse(textResult);
+                document.getElementById('res-blueprint').innerHTML = formatMarkdown(cachedBlueprintResultText);
                 // Sembunyikan placeholder kosong
                 const placeholder = document.getElementById('res-empty-placeholder');
                 if (placeholder) placeholder.classList.add('hidden');
@@ -760,8 +867,8 @@
             try {
                 const fullPrompt = `Gunakan Blueprint/Kisi-kisi yang telah disepakati ini sebagai pedoman tunggal:\n\n${cachedBlueprintResultText}\n\nPerintah:\n${prompt2}`;
                 const textResult = await callGeminiAPI(selectedModel, apiKey, fullPrompt);
-                cachedSoalResultText = textResult;
-                document.getElementById('res-soal').innerHTML = formatMarkdown(textResult);
+                cachedSoalResultText = cleanAIResponse(textResult);
+                document.getElementById('res-soal').innerHTML = formatMarkdown(cachedSoalResultText);
                 endLoadingProgress();
                 setTimeout(() => showLoading(false), 500);
                 showToast('✅ Soal & Pembahasan selesai! Blueprint masih ada di tab "Blueprint / Kisi-Kisi".', 'success');
@@ -990,7 +1097,7 @@
             if(res.status === 'success' && res.data && res.data.length > 0) {
                 window.loadedHistory = res.data;
                 tbody.innerHTML = res.data.map((item, index) => `
-                    <tr class="border-b hover:bg-slate-50 transition-colors">
+                    <tr class="border-b hover:bg-slate-50 transition-colors history-row" data-mapel="${item.mapel.toLowerCase()}" data-kelas="${item.kelas.toLowerCase()}">
                         <td class="p-3 font-medium text-xs text-slate-500">${item.tanggal}</td>
                         <td class="p-3 font-semibold text-slate-800">${item.mapel}</td>
                         <td class="p-3 text-sm">${item.kelas}</td>
@@ -1006,6 +1113,11 @@
                                     Buka Hasil
                                 </button>` : '<span class="text-xs text-slate-400 italic">Hasil tidak tersimpan</span>'}
                             </div>
+                        </td>
+                        <td class="p-3">
+                            <button onclick="deleteHistory('${item.histId}', this)" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all" title="Hapus riwayat ini">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
                         </td>
                     </tr>
                 `).join('');
@@ -1074,6 +1186,7 @@
             if(currentUser) {
                 document.getElementById('nav-auth-text').innerText = currentUser.nama;
                 document.getElementById('nav-history-btn').classList.remove('hidden');
+                document.getElementById('nav-logout-btn').classList.remove('hidden');
                 document.getElementById('user-name-display').innerText = currentUser.nama;
                 document.getElementById('user-badge').classList.remove('hidden');
                 document.getElementById('user-badge').classList.add('flex');
@@ -1152,6 +1265,162 @@
             setTimeout(() => {
                 banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 600);
+        }
+
+        // =============================================
+        // LOGOUT
+        // =============================================
+        function handleLogout() {
+            if (!confirm('Yakin ingin keluar dari akun?')) return;
+            currentUser = null;
+            sessionStorage.removeItem('maharati_user');
+            // Reset UI
+            document.getElementById('nav-auth-text').innerText = 'Login Member';
+            document.getElementById('nav-history-btn').classList.add('hidden');
+            document.getElementById('nav-logout-btn').classList.add('hidden');
+            document.getElementById('user-badge').classList.add('hidden');
+            document.getElementById('user-badge').classList.remove('flex');
+            document.getElementById('member-draft-controls').classList.add('hidden');
+            document.getElementById('history-table-body').innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada riwayat aktivitas yang tersimpan.</td></tr>';
+            switchView('home');
+            showToast('Berhasil logout. Sampai jumpa!', 'info');
+        }
+
+        // =============================================
+        // HAPUS HISTORY
+        // =============================================
+        async function deleteHistory(histId, btnEl) {
+            if (!histId || !confirm('Hapus riwayat ini dari database?')) return;
+            btnEl.disabled = true;
+            btnEl.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>';
+            const res = await callGASBackend('delete_history', { histId });
+            if (res.status === 'success') {
+                btnEl.closest('tr').remove();
+                showToast('Riwayat berhasil dihapus.', 'success');
+            } else {
+                btnEl.disabled = false;
+                showToast('Gagal menghapus: ' + res.message, 'error');
+            }
+        }
+
+        // =============================================
+        // CARI / FILTER HISTORY (client-side)
+        // =============================================
+        function filterHistory(query) {
+            const q = query.toLowerCase().trim();
+            document.querySelectorAll('.history-row').forEach(row => {
+                const mapel = row.dataset.mapel || '';
+                const kelas = row.dataset.kelas || '';
+                row.style.display = (!q || mapel.includes(q) || kelas.includes(q)) ? '' : 'none';
+            });
+        }
+
+        // =============================================
+        // TEMPLATE CP/TP
+        // =============================================
+        window.templateData = null;
+
+        async function openTemplateModal() {
+            showToast('Memuat data template...', 'info');
+            if (!window.templateData) {
+                const res = await callGASBackend('get_templates', {});
+                if (res.status !== 'success' || !res.templates) {
+                    showToast('Template belum tersedia. Isi sheet Templates_CP dan Templates_Bab terlebih dahulu.', 'error');
+                    return;
+                }
+                window.templateData = res;
+            }
+            const { templates } = window.templateData;
+            if (!templates || templates.length === 0) {
+                showToast('Belum ada data template. Isi sheet Templates_CP terlebih dahulu.', 'error');
+                document.getElementById('tmpl-empty').classList.remove('hidden');
+                document.getElementById('template-modal').classList.remove('hidden');
+                return;
+            }
+            // Populate dropdown Mapel
+            const mapelSet = [...new Set(templates.map(t => t.mapel))].sort();
+            document.getElementById('tmpl-mapel').innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>' +
+                mapelSet.map(m => `<option value="${m}">${m}</option>`).join('');
+            document.getElementById('tmpl-fase').innerHTML = '<option value="">-- Pilih Fase --</option>';
+            document.getElementById('tmpl-cp-container').classList.add('hidden');
+            document.getElementById('tmpl-bab-container').classList.add('hidden');
+            document.getElementById('tmpl-empty').classList.add('hidden');
+            document.getElementById('tmpl-apply-btn').disabled = true;
+            document.getElementById('template-modal').classList.remove('hidden');
+        }
+
+        function onTemplateMapelChange() {
+            const mapel = document.getElementById('tmpl-mapel').value;
+            if (!mapel || !window.templateData) return;
+            const { templates } = window.templateData;
+            const fases = [...new Set(templates.filter(t => t.mapel === mapel).map(t => t.fase))].sort();
+            document.getElementById('tmpl-fase').innerHTML = '<option value="">-- Pilih Fase --</option>' +
+                fases.map(f => `<option value="${f}">${f}</option>`).join('');
+            document.getElementById('tmpl-cp-container').classList.add('hidden');
+            document.getElementById('tmpl-bab-container').classList.add('hidden');
+            document.getElementById('tmpl-apply-btn').disabled = true;
+        }
+
+        function onTemplateFaseChange() {
+            const mapel = document.getElementById('tmpl-mapel').value;
+            const fase = document.getElementById('tmpl-fase').value;
+            if (!mapel || !fase || !window.templateData) return;
+            const { templates, babs } = window.templateData;
+            // Isi CP
+            const tpl = templates.find(t => t.mapel === mapel && t.fase === fase);
+            if (tpl) {
+                document.getElementById('tmpl-cp-text').value = tpl.cp || '';
+                document.getElementById('tmpl-cp-container').classList.remove('hidden');
+            }
+            // Isi daftar Bab
+            const babList = (babs || [])
+                .filter(b => b.mapel === mapel && b.fase === fase)
+                .sort((a, b) => Number(a.noBab) - Number(b.noBab));
+            if (babList.length > 0) {
+                document.getElementById('tmpl-bab-list').innerHTML = babList.map((b, i) => `
+                    <label class="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-indigo-50 cursor-pointer transition-all">
+                        <input type="checkbox" class="tmpl-bab-check mt-0.5 w-4 h-4 accent-indigo-600" data-bab-nama="${(b.namaBab||'').replace(/"/g,'&quot;')}" data-bab-tp="${(b.tp||'').replace(/"/g,'&quot;')}" data-bab-lingkup="${(b.lingkup||'').replace(/"/g,'&quot;')}" checked>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-sm text-slate-800">${b.noBab}. ${b.namaBab}</p>
+                            <p class="text-xs text-slate-500 mt-0.5 truncate">${(b.tp||'').substring(0,80)}${(b.tp||'').length > 80 ? '...' : ''}</p>
+                        </div>
+                    </label>
+                `).join('');
+                document.getElementById('tmpl-bab-container').classList.remove('hidden');
+            }
+            document.getElementById('tmpl-apply-btn').disabled = false;
+        }
+
+        function tmplCheckAll(state) {
+            document.querySelectorAll('.tmpl-bab-check').forEach(c => c.checked = state);
+        }
+
+        function applyTemplate() {
+            const cpText = document.getElementById('tmpl-cp-text').value;
+            // Terapkan CP ke form
+            document.getElementById('f-cp').value = cpText;
+            // Terapkan Mapel ke form
+            const mapel = document.getElementById('tmpl-mapel').value;
+            if (mapel) document.getElementById('f-mapel').value = mapel;
+            // Terapkan bab yang dicentang
+            const checks = document.querySelectorAll('.tmpl-bab-check:checked');
+            if (checks.length > 0) {
+                document.getElementById('bab-container').innerHTML = '';
+                babCount = 0;
+                checks.forEach(check => {
+                    addBabWithValues(
+                        check.dataset.babNama || '',
+                        check.dataset.babTp || '',
+                        check.dataset.babLingkup || ''
+                    );
+                });
+            }
+            closeTemplateModal();
+            showToast(`Template "${mapel}" berhasil diterapkan! Anda dapat mengedit sesuai kebutuhan.`, 'success');
+        }
+
+        function closeTemplateModal() {
+            document.getElementById('template-modal').classList.add('hidden');
         }
 
         function showToast(message, type = 'info') {
