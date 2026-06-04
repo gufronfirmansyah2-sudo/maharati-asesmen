@@ -73,8 +73,14 @@
         // URL deployment GAS (satu GAS untuk semua fitur)
         // =====================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycby4FiDu9bFk2vG1AZbNrErGoj1QHA5ld_1eGdootCIdlfDOOebtDSG0jlt9QSujroWr/exec";
-        // Traktir Kopi pakai URL yang SAMA karena sudah digabung di satu GAS
         const TRAKTIR_KOPI_GAS_URL = GAS_API_URL;
+
+        // AQ system keys — dipanggil langsung dari browser
+        // Key 1-3 (AIzaSy) tersimpan aman di backend GAS
+        const AQ_SYSTEM_KEYS = {
+            key4: "AQ.Ab8RN6LoyQSu0ou3gsgYlmrGNhkphcIqCzOGcoI3CUZVk4VYmQ",
+            key5: "AQ.Ab8RN6INkWeC8tnDHzFhj1Qm5xBVp35D0km1euR14pgN5qEbog"
+        };
     </script>
 
     <!-- Sidebar Menu -->
@@ -228,7 +234,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v2.3 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v4.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -485,10 +491,12 @@
                             Buat Naskah & Pembahasan (Langkah 2)
                         </button>
                     </div>
-                    <div class="flex flex-col sm:flex-row gap-4 pt-2">
-                        <button type="button" onclick="generateProcess('prompt')" class="w-full bg-white border-2 border-slate-300 text-slate-700 py-3.5 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-400 transition-all flex justify-center items-center gap-2 shadow-sm text-sm">
+                    <!-- Tombol Generate Prompt — khusus Sahabat Maharati -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-2" id="btn-prompt-wrapper">
+                        <button type="button" onclick="generatePromptGated()" class="w-full bg-white border-2 border-slate-300 text-slate-700 py-3.5 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-400 transition-all flex justify-center items-center gap-2 shadow-sm text-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                             Generate Formula Prompt Saja (Tanpa API)
+                            <span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full font-bold">MEMBER</span>
                         </button>
                     </div>
                 </form>
@@ -522,59 +530,65 @@
                             <option value="gemini-2.5-pro">Google Gemini 2.5 Pro (Penalaran Tinggi, Butuh Kuota)</option>
                         </select>
                     </div>
-                    <!-- Pilihan Jalur API — Radio Unified (semua opsi) -->
+                    <!-- Pilihan Jalur API — Radio Unified -->
                     <div class="mb-5">
                         <label class="block text-sm font-bold text-slate-700 mb-2">Pilih Jalur API</label>
                         <div class="space-y-2" id="api-key-radio-group">
-
-                            <!-- Sahabat Maharati (hanya Sahabat Maharati) -->
-                            <label id="radio-sahabat" class="hidden api-radio-item items-center gap-3 p-3 border-2 border-amber-300 bg-amber-50 rounded-xl cursor-pointer hover:bg-amber-100 transition-all">
-                                <input type="radio" name="api-choice" value="sahabat" class="accent-amber-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
-                                <div class="flex-1">
-                                    <p class="text-sm font-bold text-amber-900">⭐ Sahabat Maharati</p>
-                                    <p class="text-xs text-amber-600 font-mono mt-0.5">AIzaSyDjVj...YXw8 — jalur khusus & kuota terpisah</p>
-                                </div>
-                            </label>
-
-                            <!-- Maharati Default (semua user) -->
+                            <!-- API Key 1 (Tamu & Member) -->
                             <label class="api-radio-item flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
-                                <input type="radio" name="api-choice" value="default" class="accent-blue-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
+                                <input type="radio" name="api-choice" value="key1" class="accent-blue-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
                                 <div class="flex-1">
-                                    <p class="text-sm font-bold text-slate-700">📡 Maharati Default</p>
-                                    <p class="text-xs text-slate-400 font-mono mt-0.5">AIzaSyCz98...tYA</p>
+                                    <p class="text-sm font-bold text-slate-700">API Key 1 <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded ml-1">Tamu & Member</span></p>
                                 </div>
                             </label>
-
-                            <!-- Maharati Opsional (hanya Sahabat Maharati) -->
-                            <label id="radio-opsional" class="hidden api-radio-item items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
-                                <input type="radio" name="api-choice" value="opsional" class="accent-slate-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
+                            <!-- API Key 2 (Member) -->
+                            <label id="radio-key2" class="hidden api-radio-item items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <input type="radio" name="api-choice" value="key2" class="accent-blue-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
                                 <div class="flex-1">
-                                    <p class="text-sm font-bold text-slate-700">🔄 Maharati Opsional</p>
-                                    <p class="text-xs text-slate-400 font-mono mt-0.5">AIzaSyC-k1...lAo</p>
+                                    <p class="text-sm font-bold text-slate-700">API Key 2 <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded ml-1">Member</span></p>
                                 </div>
                             </label>
-
-                            <!-- Custom AIzaSy (semua user) -->
+                            <!-- API Key 3 (Member) -->
+                            <label id="radio-key3" class="hidden api-radio-item items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <input type="radio" name="api-choice" value="key3" class="accent-blue-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-slate-700">API Key 3 <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded ml-1">Member</span></p>
+                                </div>
+                            </label>
+                            <!-- API Key 4 (Member, AQ format) -->
+                            <label id="radio-key4" class="hidden api-radio-item items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <input type="radio" name="api-choice" value="key4" class="accent-blue-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-slate-700">API Key 4 <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded ml-1">Member</span> <span class="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded ml-1">AQ</span></p>
+                                </div>
+                            </label>
+                            <!-- API Key 5 (Member, AQ format) -->
+                            <label id="radio-key5" class="hidden api-radio-item items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+                                <input type="radio" name="api-choice" value="key5" class="accent-blue-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-slate-700">API Key 5 <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded ml-1">Member</span> <span class="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded ml-1">AQ</span></p>
+                                </div>
+                            </label>
+                            <!-- Custom AIzaSy -->
                             <label class="api-radio-item flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50 transition-all">
                                 <input type="radio" name="api-choice" value="aizaSyCustom" class="accent-blue-600 w-4 h-4" onchange="onApiChoiceChange(this.value)">
                                 <div class="flex-1">
-                                    <p class="text-sm font-bold text-slate-700">🔑 Key Pribadi <span class="text-xs font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 ml-1">AIzaSy...</span></p>
-                                    <p class="text-xs text-slate-400 mt-0.5">Via browser langsung — cepat & tanpa limitasi waktu server</p>
+                                    <p class="text-sm font-bold text-slate-700">🔑 API Custom <span class="text-xs font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 ml-1">AIzaSy...</span></p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Masukkan API key pribadi format AIzaSy</p>
                                 </div>
                             </label>
-
-                            <!-- Custom AQ. Token (semua user) -->
+                            <!-- Custom AQ -->
                             <label class="api-radio-item flex items-center gap-3 p-3 border border-amber-200 bg-amber-50/50 rounded-xl cursor-pointer hover:bg-amber-50 transition-all">
                                 <input type="radio" name="api-choice" value="aqToken" class="accent-amber-500 w-4 h-4" onchange="onApiChoiceChange(this.value)">
                                 <div class="flex-1">
-                                    <p class="text-sm font-bold text-amber-900">⚡ AQ. Token <span class="text-[10px] font-mono bg-amber-100 px-1.5 py-0.5 rounded text-amber-700 ml-1">AQ.Ab8...</span></p>
-                                    <p class="text-xs text-amber-600 mt-0.5">Via browser langsung — format key baru Google AI Studio</p>
+                                    <p class="text-sm font-bold text-amber-900">⚡ API Custom <span class="text-[10px] font-mono bg-amber-100 px-1.5 py-0.5 rounded text-amber-700 ml-1">AQ...</span></p>
+                                    <p class="text-xs text-amber-600 mt-0.5">Masukkan token AQ pribadi Anda</p>
                                 </div>
                             </label>
                         </div>
                     </div>
 
-                    <!-- Input AIzaSy (muncul saat pilih "Key Pribadi") -->
+                                        <!-- Input AIzaSy (muncul saat pilih "Key Pribadi") -->
                     <div id="input-aizasy" class="hidden mb-4 animate-fade-in">
                         <label class="block text-xs font-bold text-slate-600 mb-1.5">Masukkan API Key (AIzaSy...)</label>
                         <input type="password" id="api-key-input"
@@ -608,9 +622,63 @@
                     </div>
                     <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-4">
                         <div><label class="block text-sm mb-1 font-medium text-slate-700">Email Sekolah / Pribadi</label><input type="email" id="l-email" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required></div>
-                        <div><label class="block text-sm mb-1 font-medium text-slate-700">Password</label><input type="password" id="l-password" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required></div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-sm font-medium text-slate-700">Password</label>
+                                <button type="button" onclick="showForgotPassword()" class="text-xs text-blue-600 hover:underline font-medium">Lupa Password?</button>
+                            </div>
+                            <input type="password" id="l-password" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+                        </div>
                         <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-md">Masuk Sekarang</button>
                     </form>
+
+                    <!-- LANGKAH 1: Verifikasi Identitas dengan Email + Kode Donasi -->
+                    <div id="form-forgot-password" class="hidden space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
+                            <p class="text-sm font-bold text-blue-800">🔐 Verifikasi Identitas</p>
+                            <p class="text-xs text-blue-600 mt-0.5">Masukkan email + kode donasi yang dipakai saat daftar</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1 font-medium text-slate-700">Email Terdaftar</label>
+                            <input type="email" id="forgot-email" placeholder="email@sekolah.com"
+                                class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1 font-medium text-slate-700">Kode Donasi (saat pendaftaran)</label>
+                            <input type="text" id="forgot-kode" placeholder="Contoh: KOPI-GF-001 atau DEV-26-001-X7K2"
+                                class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono uppercase"
+                                oninput="this.value=this.value.toUpperCase()">
+                            <p class="text-xs text-slate-400 mt-1">Kode yang Anda gunakan saat pertama kali mendaftar</p>
+                        </div>
+                        <button onclick="handleVerifyResetIdentity()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-md">
+                            Verifikasi Identitas →
+                        </button>
+                        <button onclick="hideForgotPassword()" class="w-full border border-slate-300 text-slate-600 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all text-sm">
+                            ← Kembali ke Login
+                        </button>
+                    </div>
+
+                    <!-- LANGKAH 2: Isi Password Baru (setelah verifikasi berhasil) -->
+                    <div id="form-reset-password" class="hidden space-y-4">
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+                            <p class="text-sm font-bold text-emerald-800">✅ Identitas Terverifikasi</p>
+                            <p class="text-xs text-emerald-600 mt-0.5">Silakan buat password baru Anda</p>
+                        </div>
+                        <input type="hidden" id="reset-token-input">
+                        <div>
+                            <label class="block text-sm mb-1 font-medium text-slate-700">Password Baru</label>
+                            <input type="password" id="reset-new-password" placeholder="Minimal 8 karakter"
+                                class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1 font-medium text-slate-700">Konfirmasi Password Baru</label>
+                            <input type="password" id="reset-confirm-password" placeholder="Ulangi password baru"
+                                class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <button onclick="handleResetPassword()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-md">
+                            ✅ Simpan Password Baru
+                        </button>
+                    </div>
                     <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="space-y-4 hidden">
                         <!-- Header form -->
                         <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
@@ -639,7 +707,10 @@
             <!-- VIEW: OUTPUT HASIL GENERATE -->
             <div id="view-result" class="hidden max-w-5xl mx-auto h-full flex flex-col space-y-4">
                 <div class="bg-white rounded-xl border border-slate-200 flex shadow-sm overflow-hidden flex-shrink-0">
-                    <button onclick="switchResultTab('prompt')" id="rtab-prompt" class="px-4 py-4 font-bold text-blue-600 border-b-2 border-blue-600 text-sm md:text-base">Prompt Master</button>
+                    <button onclick="switchResultTabGated('prompt')" id="rtab-prompt" class="px-4 py-4 font-bold text-blue-600 border-b-2 border-blue-600 text-sm md:text-base flex items-center gap-1.5">
+                        Prompt Master
+                        <span class="text-[9px] bg-amber-100 text-amber-700 px-1 py-0.5 rounded font-bold">MEMBER</span>
+                    </button>
                     <button onclick="switchResultTab('blueprint')" id="rtab-blueprint" class="px-4 py-4 font-bold text-slate-500 text-sm md:text-base flex items-center gap-2">
                         <span id="rtab-blueprint-badge" class="hidden w-2 h-2 rounded-full bg-emerald-500"></span>
                         Blueprint / Kisi-Kisi
@@ -965,6 +1036,7 @@
                 updateAuthUI();
                 fetchHistoryData();
             }
+            checkResetTokenInURL(); // Cek token reset di URL
         };
 
         function toggleSidebar() {
@@ -1072,16 +1144,18 @@
 
             const isSahabat = currentUser?.level === 'Sahabat Maharati';
             const customKey = localStorage.getItem('gemini_api_key');
-            const sysPref = localStorage.getItem(SYSTEM_KEY_PREF) || 'sahabat';
+            const sysPref = localStorage.getItem(SYSTEM_KEY_PREF) || 'key1';
 
-            // Tampilkan/sembunyikan opsi khusus Sahabat Maharati
-            const radioSahabat  = document.getElementById('radio-sahabat');
-            const radioOpsional = document.getElementById('radio-opsional');
-            if (radioSahabat)  isSahabat ? radioSahabat.classList.replace('hidden','flex')  : radioSahabat.classList.add('hidden');
-            if (radioOpsional) isSahabat ? radioOpsional.classList.replace('hidden','flex') : radioOpsional.classList.add('hidden');
+            // Tampilkan key 2-5 hanya untuk Sahabat Maharati
+            ['radio-key2','radio-key3','radio-key4','radio-key5'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (isSahabat) el.classList.replace('hidden','flex');
+                else el.classList.add('hidden');
+            });
 
             // Restore pilihan radio dari localStorage
-            const activeChoice = sysPref || (isSahabat ? 'sahabat' : 'default');
+            const activeChoice = sysPref || 'key1';
             const radioEl = document.querySelector(`input[name="api-choice"][value="${activeChoice}"]`);
             if (radioEl) {
                 radioEl.checked = true;
@@ -1091,13 +1165,15 @@
             const aqToken   = localStorage.getItem('aq_token');
             const aizaKey  = localStorage.getItem('gemini_api_key');
             const choiceLabels = {
-                sahabat      : '⭐ Sahabat Maharati',
-                default      : '📡 Maharati Default',
-                opsional     : '🔄 Maharati Opsional',
-                aizaSyCustom : '🔑 Key Pribadi (AIzaSy...)',
-                aqToken      : '⚡ AQ. Token (via browser)'
+                key1         : 'API Key 1',
+                key2         : 'API Key 2',
+                key3         : 'API Key 3',
+                key4         : 'API Key 4 (AQ)',
+                key5         : 'API Key 5 (AQ)',
+                aizaSyCustom : '🔑 API Custom AIzaSy...',
+                aqToken      : '⚡ API Custom AQ...'
             };
-            const activeLabel = choiceLabels[sysPref] || (isSahabat ? '⭐ Sahabat Maharati' : '📡 Maharati Default');
+            const activeLabel = choiceLabels[sysPref] || 'API Key 1';
 
             if (aqToken) {
                 el.className = "mb-5 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 bg-amber-50 border-amber-300 text-amber-800";
@@ -1142,7 +1218,7 @@
         }
 
         function saveApiKey() {
-            const activeChoice = localStorage.getItem(SYSTEM_KEY_PREF) || 'default';
+            const activeChoice = localStorage.getItem(SYSTEM_KEY_PREF) || 'key1';
 
             if (activeChoice === 'aizaSyCustom') {
                 // Simpan HANYA AIzaSy key, pastikan AQ token bersih
@@ -1325,13 +1401,19 @@
         }
 
         async function callGeminiAPI(selectedModel, apiKey, prompt) {
-            // Semua custom key (AIzaSy... maupun AQ...) dipanggil langsung dari browser
-            // — lebih cepat, tidak ada timeout server GAS, dan mendukung kedua format key
+            // Custom key → browser langsung
             if (apiKey && apiKey.trim() !== '') {
                 return await callGeminiDirect(selectedModel, apiKey.trim(), prompt);
             }
-            // Key kosong → lewat GAS server (pakai system key yang aman tersimpan di backend)
-            const sysPref = localStorage.getItem(SYSTEM_KEY_PREF) || 'sahabat';
+            const sysPref = localStorage.getItem(SYSTEM_KEY_PREF) || 'key1';
+            // key4 & key5 = AQ system keys → browser langsung (tidak bisa dari GAS)
+            if (sysPref === 'key4' && AQ_SYSTEM_KEYS.key4) {
+                return await callGeminiDirect(selectedModel, AQ_SYSTEM_KEYS.key4, prompt);
+            }
+            if (sysPref === 'key5' && AQ_SYSTEM_KEYS.key5) {
+                return await callGeminiDirect(selectedModel, AQ_SYSTEM_KEYS.key5, prompt);
+            }
+            // key1-3 (AIzaSy) → GAS server
             const res = await callGASBackend('generate_gemini', {
                 model: selectedModel,
                 customApiKey: '',
@@ -1386,12 +1468,11 @@
                 if (placeholder) placeholder.classList.add('hidden');
                 document.getElementById('res-blueprint').classList.remove('hidden');
 
-                if (apiKey) {
-                    // Streaming — teks muncul bertahap
+                const effectiveKey = apiKey || ((['key4','key5'].includes(localStorage.getItem(SYSTEM_KEY_PREF))) ? AQ_SYSTEM_KEYS[localStorage.getItem(SYSTEM_KEY_PREF)] : null);
+                if (effectiveKey) {
                     showLoading(false);
-                    textResult = await callGeminiStream(selectedModel, apiKey, prompt1, document.getElementById('res-blueprint'));
+                    textResult = await callGeminiStream(selectedModel, effectiveKey, prompt1, document.getElementById('res-blueprint'));
                 } else {
-                    // GAS backend — spinner biasa
                     textResult = await callGeminiAPI(selectedModel, apiKey, prompt1);
                     document.getElementById('res-blueprint').innerHTML = formatMarkdown(cleanAIResponse(textResult));
                 }
@@ -1443,9 +1524,10 @@
                 let textResult;
                 document.getElementById('res-soal').classList.remove('hidden');
 
-                if (apiKey) {
+                const effectiveKey2 = apiKey || ((['key4','key5'].includes(localStorage.getItem(SYSTEM_KEY_PREF))) ? AQ_SYSTEM_KEYS[localStorage.getItem(SYSTEM_KEY_PREF)] : null);
+                if (effectiveKey2) {
                     showLoading(false);
-                    textResult = await callGeminiStream(selectedModel, apiKey, fullPrompt, document.getElementById('res-soal'));
+                    textResult = await callGeminiStream(selectedModel, effectiveKey2, fullPrompt, document.getElementById('res-soal'));
                 } else {
                     textResult = await callGeminiAPI(selectedModel, apiKey, fullPrompt);
                     document.getElementById('res-soal').innerHTML = formatMarkdown(cleanAIResponse(textResult));
@@ -2534,6 +2616,85 @@
                 if (icon) icon.classList.add('rotated');
             }
         }
+
+        // =============================================
+        // GATE: Generate Prompt hanya untuk Member
+        // =============================================
+        function generatePromptGated() {
+            if (!currentUser) {
+                showDonorGateModal();
+                return;
+            }
+            generateProcess('prompt');
+        }
+
+        function switchResultTabGated(tab) {
+            if (tab === 'prompt' && !currentUser) {
+                showDonorGateModal();
+                return;
+            }
+            switchResultTab(tab);
+        }
+
+        // =============================================
+        // LUPA & RESET PASSWORD
+        // =============================================
+        function showForgotPassword() {
+            document.getElementById('form-login').classList.add('hidden');
+            document.getElementById('form-forgot-password').classList.remove('hidden');
+            if (document.getElementById('form-reset-password'))
+                document.getElementById('form-reset-password').classList.add('hidden');
+        }
+
+        function hideForgotPassword() {
+            document.getElementById('form-forgot-password').classList.add('hidden');
+            document.getElementById('form-login').classList.remove('hidden');
+        }
+
+        // LANGKAH 1 — Verifikasi email + kode donasi
+        async function handleVerifyResetIdentity() {
+            const email = document.getElementById('forgot-email').value.trim();
+            const kode  = document.getElementById('forgot-kode').value.trim().toUpperCase();
+            if (!email || !kode) {
+                showToast('Isi email dan kode donasi.', 'error'); return;
+            }
+            showToast('Memverifikasi identitas...', 'info');
+            const res = await callGASBackend('verify_reset_identity', { email, kode });
+            if (res.status === 'success') {
+                // Simpan token sementara dari GAS
+                document.getElementById('reset-token-input').value = res.token;
+                document.getElementById('form-forgot-password').classList.add('hidden');
+                document.getElementById('form-reset-password').classList.remove('hidden');
+                showToast('✅ Identitas terverifikasi. Buat password baru Anda.', 'success');
+            } else {
+                showToast(res.message || 'Verifikasi gagal.', 'error');
+            }
+        }
+
+        // LANGKAH 2 — Simpan password baru
+        async function handleResetPassword() {
+            const token    = document.getElementById('reset-token-input').value;
+            const newPass  = document.getElementById('reset-new-password').value;
+            const confPass = document.getElementById('reset-confirm-password').value;
+
+            if (!newPass || newPass.length < 8) {
+                showToast('Password minimal 8 karakter.', 'error'); return;
+            }
+            if (newPass !== confPass) {
+                showToast('Konfirmasi password tidak cocok.', 'error'); return;
+            }
+            const res = await callGASBackend('reset_password', { token, newPassword: newPass });
+            if (res.status === 'success') {
+                showToast('✅ Password berhasil diubah! Silakan login.', 'success');
+                document.getElementById('form-reset-password').classList.add('hidden');
+                document.getElementById('form-login').classList.remove('hidden');
+            } else {
+                showToast(res.message || 'Gagal reset password. Coba verifikasi ulang.', 'error');
+            }
+        }
+
+        // Tidak diperlukan lagi karena tidak ada reset via link URL
+        function checkResetTokenInURL() { /* tidak dipakai */ }
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
