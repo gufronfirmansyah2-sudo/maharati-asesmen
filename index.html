@@ -220,7 +220,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20 pointer-events-none select-none" aria-hidden="true"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12 pointer-events-none select-none" aria-hidden="true"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v10.3 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v2.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -371,11 +371,9 @@
                                 <label class="block text-sm font-medium text-blue-800 mb-1">Jelaskan Lingkungan Lokal Sekolah</label>
                                 <input type="text" id="f-lokasi" placeholder="Contoh: Kapuas, dekat aliran sungai, perkebunan dan pertanian padi"
                                     class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div
-                            
+                            </div>
                         </div>
-                        </div>
-                    </div></div>
+                    </div>
 
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                         <button type="button" onclick="toggleSection('sec-kurikulum')" class="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
@@ -429,8 +427,7 @@
                                 </div>
                                 <div id="bab-container" class="space-y-4"></div>
                             </div>
-                        </div>
-                    </div></div>
+                    </div>
 
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                         <button type="button" onclick="toggleSection('sec-evaluasi')" class="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
@@ -479,8 +476,9 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
-                    </div></div>
+                    </div>
+                </div>
+            </div>
 
                     <div class="flex flex-col sm:flex-row gap-4 pt-4">
                         <button type="button" id="btn-wizard-step1" onclick="generateWizardStep1()" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all flex justify-center items-center gap-2">
@@ -731,6 +729,8 @@
                         </div>
                     </form>
                 </div>
+            </div>
+            </div>
             </div>
 
             <!-- VIEW: OUTPUT HASIL GENERATE -->
@@ -1059,9 +1059,21 @@
 
             <!-- Loading Spinner -->
             <!-- Loading Spinner -->
-            <div id="loading-overlay" class="hidden fixed inset-0 bg-slate-900/70 z-50 flex items-center justify-center flex-col gap-4">
-                <div class="w-14 h-14 rounded-full border-4 border-white/20 border-t-white animate-spin"></div>
-                <p id="loading-text" class="text-white font-semibold text-sm">Memproses permintaan...</p>
+            <div id="loading-overlay" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center hidden">
+                <div class="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center w-full max-w-sm text-center border border-slate-100">
+                    <div class="relative flex items-center justify-center mb-4">
+                        <svg class="animate-spin h-14 w-14 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span id="progress-percentage" class="absolute text-xs font-bold text-slate-700">0%</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900" id="loading-title">Memproses Data</h3>
+                    <p class="text-xs text-slate-500 mt-2 leading-relaxed" id="loading-desc">AI sedang menyusun elemen kurikulum terbaik...</p>
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full mt-4 overflow-hidden">
+                        <div id="progress-bar-fill" class="bg-blue-600 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Modal Template CP/TP -->
@@ -2417,4 +2429,5 @@ function updateApiKeyMemberState() {
 
 </body>
 </html>
+
 
