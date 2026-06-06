@@ -220,7 +220,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20 pointer-events-none select-none" aria-hidden="true"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-16 -translate-x-12 pointer-events-none select-none" aria-hidden="true"></div>
                     <div class="relative z-10">
-                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v11.3 • Kurikulum Merdeka</span>
+                        <span class="inline-block bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 mb-4">Asesmen Maharati AI v2.3 • Kurikulum Merdeka</span>
                         <h2 class="text-3xl font-extrabold mb-3 leading-tight">Asesmen Sumatif Berkualitas,<br>Tepat Sasaran & Tanpa Ribet 🎯</h2>
                         <p class="text-blue-100 mb-3 max-w-xl text-sm leading-relaxed">
                             Guru yang baik bukan hanya mengajar — tetapi juga mengukur dengan tepat.<br>
@@ -1249,17 +1249,19 @@ function cleanAIResponse(text) {
     return text.replace(/^(Baik,|Tentu,|Berikut (adalah|ini)|Dengan senang hati)[^\n]*/i, '').trim();
 }
 
-function showLoading(show, text) {
-    const overlay = document.getElementById('loading-overlay');
-    if (!overlay) return;
-    if (show) {
-        overlay.classList.remove('hidden');
-        const ltEl = document.getElementById('loading-text');
-        if (ltEl) ltEl.textContent = text || 'Memproses permintaan...';
-    } else {
-        overlay.classList.add('hidden');
+function showLoading(show, title, desc) {
+        const overlay = document.getElementById('loading-overlay');
+        if (!overlay) return;
+        if (show) {
+            const el_title = document.getElementById('loading-title');
+            const el_desc  = document.getElementById('loading-desc');
+            if (el_title) el_title.textContent = title || 'Memproses Data';
+            if (el_desc)  el_desc.textContent  = desc  || 'AI sedang bekerja...';
+            overlay.classList.remove('hidden');
+        } else {
+            overlay.classList.add('hidden');
+        }
     }
-}
 
 function showToast(message, type = 'info') {
     const colors = { success:'bg-emerald-600', error:'bg-rose-600', info:'bg-blue-600', warning:'bg-amber-600' };
@@ -1886,7 +1888,7 @@ async function handleRegisterSubmit(e) {
     const email   = document.getElementById('r-email').value.trim();
     const sekolah = document.getElementById('r-sekolah').value.trim();
     const pass    = document.getElementById('r-password').value;
-    const kode    = document.getElementById('r-kode').value.trim().toUpperCase();
+    const kode    = document.getElementById('r-kode-donasi').value.trim().toUpperCase();
     if (!nama||!email||!sekolah||!pass||!kode) { showToast('Semua field wajib diisi!', 'error'); return; }
     showLoading(true, 'Mendaftarkan akun...');
     const res = await callGASBackend('register', { nama, email, sekolah, password: pass, kode_donasi: kode });
@@ -2438,18 +2440,19 @@ function updateApiKeyMemberState() {
             }
         }
 
-        window.onload = () => {
-    checkApiKey();
-    addBab();
-    toggleSpesifikasiSoal();
-    const savedUser = sessionStorage.getItem('maharati_user');
-    if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        updateAuthUI();
-        fetchHistoryData();
-    }
-    checkResetTokenInURL();
-};
+        window.onload = function() {
+        try { checkApiKey(); } catch(e) {}
+        try { addBab(); } catch(e) {}
+        try { toggleSpesifikasiSoal(); } catch(e) {}
+        var savedUser = sessionStorage.getItem('maharati_user');
+        if (savedUser) {
+            try {
+                currentUser = JSON.parse(savedUser);
+                updateAuthUI();
+                fetchHistoryData();
+            } catch(e) { console.error('Session restore error:', e); }
+        }
+    };
 
 </script>
 
