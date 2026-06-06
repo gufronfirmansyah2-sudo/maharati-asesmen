@@ -1209,7 +1209,7 @@ function switchView(viewId) {
     document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden'));
     const target = document.getElementById('view-' + viewId);
     if (target) target.classList.remove('hidden');
-    const titleEl = document.getElementById('page-title');
+    const titleEl = document.getElementById('header-title');
     if (titleEl) titleEl.textContent = titles[viewId] || '';
     const sidebar = document.getElementById('sidebar');
     if (sidebar) sidebar.classList.add('-translate-x-full');
@@ -1335,7 +1335,7 @@ function checkApiKey() {
     const aq = localStorage.getItem('aq_token') || '';
     const ai = localStorage.getItem('gemini_api_key') || '';
     const pref = localStorage.getItem(SYSTEM_KEY_PREF) || 'key1';
-    const el = document.getElementById('api-key-status');
+    const el = document.getElementById('api-key-status-text');
     if (!el) return;
     if (aq) el.textContent = '⚡ AQ Token aktif';
     else if (ai) el.textContent = '🔑 Custom AIzaSy aktif';
@@ -1479,7 +1479,7 @@ function addBabWithValues(bab, tp, lingkup) {
 
 function toggleSpesifikasiSoal() {
     const jenis = document.getElementById('f-jenis-asesmen')?.value || '';
-    const soalSection = document.getElementById('spesifikasi-soal');
+    const soalSection = document.getElementById('container-jumlah-soal');
     if (soalSection) {
         const isNonTest = ['Praktik','Produk','Projek','Portofolio'].includes(jenis);
         soalSection.classList.toggle('hidden', isNonTest);
@@ -2439,6 +2439,72 @@ function updateApiKeyMemberState() {
                 setTimeout(() => wordBtn.classList.remove('ring-2','ring-emerald-400','ring-offset-1'), 5000);
             }
         }
+
+        
+        // ===== FUNGSI TAMBAHAN (sebelumnya hilang) =====
+        function copySpecificPrompt(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) { showToast('Prompt tidak ditemukan.', 'error'); return; }
+            const text = el.value || el.textContent || '';
+            navigator.clipboard.writeText(text).then(
+                () => showToast('Prompt berhasil disalin!', 'success'),
+                () => {
+                    const ta = document.createElement('textarea');
+                    ta.value = text; document.body.appendChild(ta); ta.select();
+                    try { document.execCommand('copy'); showToast('Prompt disalin!', 'success'); }
+                    catch(e) { showToast('Gagal menyalin.', 'error'); }
+                    document.body.removeChild(ta);
+                }
+            );
+        }
+
+        function onTemplateMapelChange() {
+            const mapel = document.getElementById('tmpl-mapel').value;
+            const faseSel = document.getElementById('tmpl-fase');
+            if (!mapel || !window.templateData) {
+                if (faseSel) faseSel.innerHTML = '<option value="">-- Pilih Fase --</option>';
+                return;
+            }
+            const fases = [...new Set(
+                window.templateData.templates
+                    .filter(t => t.mapel.trim().toLowerCase() === mapel.trim().toLowerCase())
+                    .map(t => t.fase)
+            )].sort();
+            if (faseSel) {
+                faseSel.innerHTML = '<option value="">-- Pilih Fase --</option>' +
+                    fases.map(f => `<option value="${f}">Fase ${f}</option>`).join('');
+            }
+            // Reset bagian bawah
+            document.getElementById('tmpl-cp-container')?.classList.add('hidden');
+            document.getElementById('tmpl-bab-container')?.classList.add('hidden');
+            document.getElementById('tmpl-tp-type-container')?.classList.add('hidden');
+            const applyBtn = document.getElementById('tmpl-apply-btn');
+            if (applyBtn) applyBtn.disabled = true;
+        }
+
+        function tmplCheckAll(checked) {
+            document.querySelectorAll('.tmpl-bab-check').forEach(cb => { cb.checked = checked; });
+        }
+
+        function resetToDefaultApiKey() {
+            localStorage.removeItem('gemini_api_key');
+            localStorage.removeItem('aq_token');
+            localStorage.setItem(SYSTEM_KEY_PREF, 'key1');
+            const aiIn = document.getElementById('api-key-input'); if (aiIn) aiIn.value = '';
+            const aqIn = document.getElementById('aq-token-input'); if (aqIn) aqIn.value = '';
+            const r1 = document.querySelector('input[name="api-choice"][value="key1"]'); if (r1) r1.checked = true;
+            onApiChoiceChange('key1');
+            checkApiKey();
+            showToast('Kunci API direset ke default sistem.', 'success');
+        }
+
+        async function saveDraftToCloud() {
+            if (!currentUser) { showToast('Hanya member yang bisa menyimpan draf ke cloud.', 'error'); return; }
+            showToast('Menyimpan draf ke cloud...', 'info');
+            await saveToHistory('Draf Manual', '', '');
+            showToast('Draf formulir tersimpan di cloud!', 'success');
+        }
+
 
         window.onload = function() {
         try { checkApiKey(); } catch(e) {}
